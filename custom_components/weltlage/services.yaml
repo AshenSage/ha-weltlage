@@ -1,0 +1,23 @@
+fetch_intel:
+  name: Globus-Daten laden
+  description: Öffentliche Flugkontakte im gewählten Ausschnitt oder Satelliten-Bahndaten laden. Flüge maximal einmal pro Minute, Bahndaten einmal pro zwei Stunden.
+  fields:
+    kind:
+      required: true
+      selector:
+        select:
+          options:
+            - flights
+            - satellites
+    latitude:
+      selector:
+        number:
+          min: -90
+          max: 90
+          mode: box
+    longitude:
+      selector:
+        number:
+          min: -180
+          max: 180
+          mode: box

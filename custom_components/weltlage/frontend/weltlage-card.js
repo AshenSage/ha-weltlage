@@ -1,5 +1,6 @@
-/* Weltlage 1.0.1 — dependency-free mobile-first Home Assistant custom card. */
-export const VERSION = '1.0.1';
+import './weltlage-globe.js?v=1.1.0';
+/* Weltlage 1.1.0 — mobile-first Home Assistant card with locally bundled globe libraries. */
+export const VERSION = '1.1.0';
 const REGIONS = { world: 'Welt', chrs: 'CH / RS', europa: 'Europa', balkan: 'Balkan', ch: 'Schweiz', rs: 'Serbien' };
 const TOPICS = { all: 'Alle Themen', politik: 'Politik & Diplomatie', konflikte: 'Konflikte', energie: 'Energie & Handel', wirtschaft: 'Wirtschaft', natur: 'Naturereignisse', technik: 'Technik' };
 const SHAPES = {
@@ -108,7 +109,7 @@ export class WeltlageCard extends (globalThis.HTMLElement || class {}) {
   static getStubConfig() { return { type: 'custom:weltlage-card', title: 'Weltlage' }; }
   getCardSize() { return 12; }
   setConfig(config) {
-    this._config = { title: 'Weltlage', region: 'world', max_items: 3, show_map: true, alert_count_entity: 'sensor.cap_alerts_wmo_alert_count', alert_updated_entity: 'sensor.cap_alerts_wmo_last_updated', alert_areas: ['RS010'], alert_label: 'Serbien · Šumadija', alert_max_age: 90, ...config };
+    this._config = { title: 'Weltlage', region: 'world', max_items: 3, show_map: true, show_globe: true, alert_count_entity: 'sensor.cap_alerts_wmo_alert_count', alert_updated_entity: 'sensor.cap_alerts_wmo_last_updated', alert_areas: ['RS010'], alert_label: 'Serbien · Šumadija', alert_max_age: 90, ...config };
     if (!REGIONS[this._config.region]) this._config.region = 'world';
     if (typeof this._config.alert_areas === 'string') this._config.alert_areas = this._config.alert_areas.split(',').map(s => s.trim()).filter(Boolean);
     this._region = this._config.region;
@@ -133,13 +134,14 @@ export class WeltlageCard extends (globalThis.HTMLElement || class {}) {
     this.shadowRoot.innerHTML = `<style>${STYLE}</style><ha-card>
       <div class="header"><div class="brand">${icon('globe')}<div><div class="eyebrow">GLOBAL / CH / RS</div><h1></h1></div></div><button class="icon-button" data-action="refresh" aria-label="Daten aktualisieren">${icon('refresh')}</button></div>
       <div class="status-line" aria-live="polite"></div><div class="setup"></div>
-      <div class="filters"><button data-region="world">Welt</button><button data-region="chrs">CH / RS</button><select aria-label="Weitere Regionen" class="region-select"><option value="">Weitere</option>${Object.entries(REGIONS).filter(([k]) => !['world', 'chrs'].includes(k)).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select></div>
+      <div class="globe-container"><weltlage-globe></weltlage-globe></div><div class="filters"><button data-region="world">Welt</button><button data-region="chrs">CH / RS</button><select aria-label="Weitere Regionen" class="region-select"><option value="">Weitere</option>${Object.entries(REGIONS).filter(([k]) => !['world', 'chrs'].includes(k)).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select></div>
       <div class="metrics"></div><div class="alerts"></div>
       <div class="layout"><section class="news-pane"><div class="section-header"><h2>Heute im Fokus</h2><select class="period-select" aria-label="Zeitraum"><option value="24">24 h</option><option value="48">48 h</option><option value="72">72 h</option></select></div><select class="topic-select" aria-label="Thema">${Object.entries(TOPICS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select><div class="news-list"></div><div class="news-more"></div><p class="footnote">Quellenauswahl · nach Zeit sortiert · Themen nach Stichworten</p></section>
       <aside class="side-pane"><div class="map-container"><div class="panel"><button class="map-open" data-action="map"><div><strong>Weltkarte öffnen</strong><span class="small muted">Konflikte · Erdbeben · Wetter</span></div>${icon('map')}</button><div class="map-note">World Monitor · Gratis-Karte, Abruf stündlich.<br>Wird erst beim Öffnen geladen.</div></div></div><details class="panel hazards-panel"><summary><div class="panel-title">${icon('globe')}<div><strong>Naturereignisse</strong><div class="small muted hazard-summary"></div></div></div>${icon('arrow')}</summary><div class="panel-body hazards-list"></div></details>
       <details class="panel sources-panel"><summary><div class="panel-title">${icon('clock')}<div><strong>Quellen & Datenalter</strong><div class="small muted sources-summary"></div></div></div>${icon('arrow')}</summary><div class="panel-body sources-list"></div></details><div class="intel-container"></div><p class="footnote">Nachrichten sind Medienberichte. Naturereignisse und Warnungen werden separat geführt.</p></aside></div>
     </ha-card><dialog aria-label="Weltkarte"><div class="dialog-head"><strong>Weltkarte</strong><button class="icon-button" data-action="close-map" aria-label="Karte schliessen">${icon('close')}</button></div><div class="map-filters"><button data-map-region="world">Welt</button><button data-map-region="europa">Europa</button><button data-map-region="balkan">Balkan</button></div><div class="iframe-holder"></div><div class="dialog-note">World Monitor · Abruf stündlich. Quellen können verzögert oder unvollständig sein.</div></dialog>`;
     this.shadowRoot.addEventListener('click', e => this._click(e));
+    this.shadowRoot.addEventListener('intel-request', e => this._fetchIntel(e.detail));
     this.shadowRoot.addEventListener('change', e => {
       if (e.target.matches('.region-select') && e.target.value) { this._region = e.target.value; this._resetLimit(); }
       if (e.target.matches('.period-select')) { this._hours = Number(e.target.value); this._resetLimit(); }
@@ -199,6 +201,7 @@ export class WeltlageCard extends (globalThis.HTMLElement || class {}) {
     const newsAvailable = articles.length > 0 || sources.some(s => s.kind === 'news' && effectiveSourceStatus(s, now) === 'ok');
     root.querySelector('.metrics').innerHTML = `<div class="metric">${icon('news')}<div><strong>${newsAvailable ? datedCount : '—'}</strong><span>Meldungen · ${this._hours} h</span></div></div><div class="metric">${icon('alert')}<div><strong>${cap.status === 'ok' ? cap.active.length : '—'}</strong><span>Aktive Warnungen · RS</span></div></div>`;
     this._renderAlerts(cap, now);
+    this._renderGlobe(data, cap);
     this._renderNews(articles, sources, now);
     root.querySelector('.map-container').hidden = !this._config.show_map;
     this._renderSources(sources, cap, now);
@@ -208,6 +211,27 @@ export class WeltlageCard extends (globalThis.HTMLElement || class {}) {
     root.querySelector('.hazards-list').innerHTML = `${hGood < 2 ? '<p class="small amber">Naturereignisdaten sind teilweise oder vollständig veraltet.</p>' : ''}<p class="small muted">USGS: Erdbeben M ≥ 4.5, letzte 24 h. GDACS: Orange / Rot, ohne doppelte Erdbeben.</p>${hazards.slice(0, 20).map(h => { const url = safeLink(h.url); return `<div class="hazard">${url ? `<a href="${escapeHTML(url)}" target="_blank" rel="noopener noreferrer">` : '<div>'}<strong>${escapeHTML(h.title)}</strong>${url ? ` ${icon('external')}</a>` : '</div>'}<div class="small muted">${escapeHTML(h.source)} · ${escapeHTML(age(h.published, now))}${['orange', 'red'].includes(h.severity) ? ` · ${h.severity === 'red' ? 'Rot' : 'Orange'}` : ''}</div></div>`; }).join('') || '<p class="small muted">Keine Ereignisse im gewählten Filter erfasst.</p>'}`;
     const intel = safeLink(this._config.intel_url);
     root.querySelector('.intel-container').innerHTML = intel ? `<div class="panel"><a class="intel-link" href="${escapeHTML(intel)}" target="_blank" rel="noopener noreferrer"><div><strong>3D Intel öffnen</strong><div class="small muted">God’s Eye · separate Ansicht</div></div>${icon('external')}</a></div>` : '';
+  }
+  _renderGlobe(data, cap) {
+    const holder = this.shadowRoot.querySelector('.globe-container');
+    const visible = this._config.show_globe !== false;
+    holder.hidden = !visible;
+    let globe = holder.querySelector('weltlage-globe');
+    if (!visible) { globe?.remove(); return; }
+    if (!globe) { globe = document.createElement('weltlage-globe'); holder.append(globe); }
+    const capPoints = (this._config.alert_areas || []).includes('RS010') ? [...cap.active, ...cap.upcoming].map(a => ({ id: a.id, name: a.title + (a.onset > Date.now() ? ' · kommend' : ''), latitude: 44.3, longitude: 20.7, source: 'CAP · Šumadija', url: a.url, description: (cap.status !== 'ok' ? 'Datenstand prüfen. ' : '') + 'Gebietsmitte Šumadija, keine exakte Ereignisposition. ' + a.description })) : [];
+    globe.payload = { hazards: data.hazards || [], intel: data.intel || {}, stale_sources: (data.sources || []).filter(s => effectiveSourceStatus(s) !== 'ok').map(s => s.id), cap: capPoints };
+  }
+  async _fetchIntel(detail) {
+    const globe = this.shadowRoot.querySelector('weltlage-globe');
+    if (!this._hass || !this._state()) { globe?.setBusy(detail.kind, false, 'Zuerst die Weltlage-Integration einrichten.'); return; }
+    globe?.setBusy(detail.kind, true);
+    try {
+      await this._hass.callService('weltlage', 'fetch_intel', detail);
+      const data = this._state()?.attributes || {};
+      this._renderGlobe(data, capAlerts(this._hass.states || {}, this._config));
+      globe?.setBusy(detail.kind, false, detail.kind === 'flights' ? 'Flugaufnahme angefordert. Neue Abfrage frühestens nach 60 Sekunden; beim Drehen bleibt die zuletzt geladene Region bestehen.' : 'Bahndaten angefordert. Erneuter Abruf frühestens nach zwei Stunden.');
+    } catch { globe?.setBusy(detail.kind, false, 'Abruf fehlgeschlagen. Integration aktualisieren, HA neu starten und Verbindung prüfen.'); }
   }
   _renderAlerts(cap, now) {
     const opened = new Set([...this.shadowRoot.querySelectorAll('.alert-row[open]')].map(n => n.dataset.key));
@@ -261,7 +285,7 @@ export class WeltlageCardEditor extends (globalThis.HTMLElement || class {}) {
     }
     const fields = [ ['title', 'Titel', 'Weltlage'], ['entity', 'Lagebild-Entität (leer = automatisch)', ''], ['alert_count_entity', 'CAP-Zähler', 'sensor.cap_alerts_wmo_alert_count'], ['alert_updated_entity', 'CAP: letzter Abruf', 'sensor.cap_alerts_wmo_last_updated'], ['alert_areas', 'CAP-Gebietscodes, durch Komma getrennt', 'RS010'], ['alert_label', 'Name der Warnregion', 'Serbien · Šumadija'], ['intel_url', 'Optional: HTTPS-Adresse deiner God’s-Eye-Installation', ''] ];
     const get = (key, def) => key === 'alert_areas' ? (this._config[key] || [def]).join?.(', ') || this._config[key] : this._config[key] ?? def;
-    this.shadowRoot.innerHTML = `<style>:host{display:block}label{display:block;margin:14px 0;font-size:14px}input,select{display:block;width:100%;box-sizing:border-box;min-height:44px;padding:10px;margin-top:6px;color:var(--primary-text-color);background:var(--card-background-color);border:1px solid var(--divider-color);border-radius:8px;font:inherit}input[type=checkbox]{display:inline;width:auto;min-height:0}p{font-size:13px;line-height:1.5;color:var(--secondary-text-color)}</style><p>Die Karte erkennt die Weltlage-Integration automatisch. CAP ist auf deine Warnregion Šumadija voreingestellt.</p>${fields.map(([key, name, def]) => `<label>${name}<input data-key="${key}" value="${escapeHTML(get(key, def))}" ${key === 'intel_url' ? 'type="url"' : ''}></label>`).join('')}<label>Startregion<select data-key="region">${Object.entries(REGIONS).map(([key, name]) => `<option value="${key}" ${key === (this._config.region || 'world') ? 'selected' : ''}>${name}</option>`).join('')}</select></label><label>Meldungen vor «Weitere»<input data-key="max_items" type="number" min="1" max="12" value="${this._config.max_items || 3}"></label><label><input data-key="show_map" type="checkbox" ${this._config.show_map !== false ? 'checked' : ''}> Weltkarte anzeigen</label>`;
+    this.shadowRoot.innerHTML = `<style>:host{display:block}label{display:block;margin:14px 0;font-size:14px}input,select{display:block;width:100%;box-sizing:border-box;min-height:44px;padding:10px;margin-top:6px;color:var(--primary-text-color);background:var(--card-background-color);border:1px solid var(--divider-color);border-radius:8px;font:inherit}input[type=checkbox]{display:inline;width:auto;min-height:0}p{font-size:13px;line-height:1.5;color:var(--secondary-text-color)}</style><p>Die Karte erkennt die Weltlage-Integration automatisch. CAP ist auf deine Warnregion Šumadija voreingestellt.</p>${fields.map(([key, name, def]) => `<label>${name}<input data-key="${key}" value="${escapeHTML(get(key, def))}" ${key === 'intel_url' ? 'type="url"' : ''}></label>`).join('')}<label>Startregion<select data-key="region">${Object.entries(REGIONS).map(([key, name]) => `<option value="${key}" ${key === (this._config.region || 'world') ? 'selected' : ''}>${name}</option>`).join('')}</select></label><label>Meldungen vor «Weitere»<input data-key="max_items" type="number" min="1" max="12" value="${this._config.max_items || 3}"></label><label><input data-key="show_map" type="checkbox" ${this._config.show_map !== false ? 'checked' : ''}> Weltkarte anzeigen</label><label><input data-key="show_globe" type="checkbox" ${this._config.show_globe !== false ? 'checked' : ''}> 3D-Globus anzeigen</label>`;
   }
   _change(e) {
       const key = e.target.dataset.key; if (!key) return;
@@ -279,5 +303,5 @@ if (globalThis.customElements) {
   if (!customElements.get('weltlage-card')) customElements.define('weltlage-card', WeltlageCard);
   if (!customElements.get('weltlage-card-editor')) customElements.define('weltlage-card-editor', WeltlageCardEditor);
   window.customCards = window.customCards || [];
-  if (!window.customCards.some(c => c.type === 'weltlage-card')) window.customCards.push({ type: 'weltlage-card', name: 'Weltlage', description: 'Mobile Weltlage mit Nachrichten, Weltkarte und CAP-Warnungen', preview: true });
+  if (!window.customCards.some(c => c.type === 'weltlage-card')) window.customCards.push({ type: 'weltlage-card', name: 'Weltlage', description: 'Mobile Weltlage mit drehbarem Globus, Flügen, Satelliten und Nachrichten', preview: true });
 }

@@ -10,6 +10,9 @@ const assert = require('node:assert/strict');
  // jsdom has no native dialog or layout engine; stub the dialog lifecycle only.
  w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};
  w.HTMLDialogElement.prototype.close=function(){this.open=false;this.dispatchEvent(new w.Event('close'));};
+ w.ResizeObserver=class{observe(){}disconnect(){}};
+ w.IntersectionObserver=class{observe(){}disconnect(){}};
+ w.HTMLCanvasElement.prototype.getContext=()=>null;
  w.eval(code);
  const card=w.card, root=card.shadowRoot;
  const click=selector=>root.querySelector(selector).click();

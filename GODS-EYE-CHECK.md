@@ -22,11 +22,11 @@ Grundfunktionen starten ohne Schlüssel. Für fotorealistische 3D-Daten gibt es 
 
 ## Was ich für uns übernehmen würde
 
-**Jetzt:** die schlanke HA-Übersicht aus diesem Paket. USGS und GDACS liefern lesbare Naturereignisse, CAP liefert regionale Warnungen und Medien liefern Kontext. Jeder Bereich zeigt seinen eigenen Datenstand.
+**Seit Weltlage 1.1.0 direkt in HA:** drehbarer Globus, öffentliche ADS-B-Flugaufnahme im gewählten Ausschnitt, ISS-/Raumstationen-Bahndaten mit lokaler SGP4-Berechnung und antippbare USGS-/GDACS-Ereignisse. CAP und statische Ortsmarken ergänzen den räumlichen Blick. Quelle, Aufnahmealter und berechnete Satellitenpositionen sind gekennzeichnet. Die Datenquellen-Ideen stammen aus dem Repo; dessen Code oder 3D-Modelle wurden nicht kopiert.
 
 **Danach:** God’s Eye separat auf einem Rechner oder eigenen Server betreiben und über «3D Intel öffnen» aufrufen. Für deine Anwendung wären Balkan/Europa, Flughäfen, Wetter und grössere Naturereignisse gute Einstiege. Satelliten sind eine interessante Zusatzansicht; aus ihrer blossen Nähe sollte kein Gefahrenalarm entstehen.
 
-Die separate Ansicht ist meine Architektur-Empfehlung, keine gemessene Aussage über die Leistung auf deinem Handy. Ich habe das Repo nicht auf deinem Gerät gestartet. Ein eigener Rechner/Server ist ebenfalls noch nicht eingerichtet.
+Die separate Ansicht bleibt die Option für den vollständigen God’s-Eye-Umfang, insbesondere fotorealistische 3D-Daten, AIS-Schiffe oder weitere Kameras. Unser eigener Globus wurde in Chromium bei Handybreiten geprüft; die ursprüngliche God’s-Eye-App wurde nicht auf deinem Handy gemessen. Ich habe das Repo nicht auf deinem Gerät gestartet. Ein eigener Rechner/Server ist ebenfalls noch nicht eingerichtet.
 
 **Später bei Bedarf:** einzelne zusätzliche Datenquellen direkt in die HA-Integration übernehmen, etwa FIRMS-Brände. Dabei bleiben Quelle, Alter, Schwelle und räumlicher Bezug sichtbar. Eine God’s-Eye-Oberfläche ist keine vorausgesetzte HA-Daten-API.
 

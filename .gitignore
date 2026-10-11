@@ -7,3 +7,5 @@ input/
 qa/
 *.zip
 .DS_Store
+
+tests/artifacts/

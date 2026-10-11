@@ -32,6 +32,8 @@ def coordinator_module():
             self.hass, self.data = hass, None
         async def async_request_refresh(self):
             self.data = await self._async_update_data()
+        def async_set_updated_data(self, data):
+            self.data = data
 
     sys.modules[modules[2]].async_get_clientsession = lambda hass: hass.session
     sys.modules[modules[3]].Store = Store

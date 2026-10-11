@@ -13,8 +13,9 @@ async def async_register_frontend(hass):
     if state.get("frontend_registered"):
         return
     # Expose only the card file, not the integration's Python files or cache.
-    card = Path(__file__).parent / "frontend" / "weltlage-card.js"
+    folder = Path(__file__).parent / "frontend"
     await hass.http.async_register_static_paths([
-        StaticPathConfig(CARD_URL, str(card), False)
+        StaticPathConfig(f"/weltlage/{name}", str(folder / name), False)
+        for name in ("weltlage-card.js", "weltlage-globe.js")
     ])
     state["frontend_registered"] = True

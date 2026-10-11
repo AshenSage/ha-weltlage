@@ -32,7 +32,11 @@ class FrontendTests(IsolatedAsyncioTestCase):
         hass = self.make_hass()
         await frontend.async_register_frontend(hass)
         paths = hass.http.async_register_static_paths.call_args.args[0]
-        self.assertEqual(len(paths), 1)
+        self.assertEqual(len(paths), 2)
+        self.assertEqual({Path(p.path).name for p in paths}, {"weltlage-card.js", "weltlage-globe.js"})
+        for p in paths:
+            self.assertTrue(Path(p.path).is_file())
+            self.assertFalse(p.cache_headers)
         self.assertEqual(paths[0].url_path, "/weltlage/weltlage-card.js")
         self.assertEqual(Path(paths[0].path).name, "weltlage-card.js")
         self.assertTrue(Path(paths[0].path).is_file())

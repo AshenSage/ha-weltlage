@@ -1,4 +1,5 @@
 import asyncio
+import json
 from types import SimpleNamespace
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import patch
@@ -110,3 +111,51 @@ class CoordinatorTests(IsolatedAsyncioTestCase):
         self.assertEqual(data["status"], "unavailable")
         self.assertEqual(data["current_sources"], 0)
         self.assertEqual(data["articles"], [])
+
+    async def test_intel_only_loads_on_request_and_is_throttled(self):
+        self.coordinator.data = {"articles": [{"id":"unchanged"}]}
+        self.responses["good"] = (200, json.dumps({"now":10000,"ac":[{"hex":"abc123","lat":44,"lon":20,"seen_pos":1}]}).encode())
+        url = self.coordinator.sources["good"]["url"]
+        with patch.object(c, "flight_url", return_value=(url,45,20)), patch.object(c.time, "time", return_value=10000):
+            await self.coordinator.async_fetch_intel("flights",44,20)
+            await self.coordinator.async_fetch_intel("flights",44,20)
+        self.assertEqual(len(self.requests),1)
+        self.assertEqual(len(self.coordinator.data["intel"]["flights"]["items"]),1)
+        self.assertEqual(self.coordinator.data["articles"],[{"id":"unchanged"}])
+        self.assertEqual(self.coordinator.cache,{})
+
+    async def test_intel_failure_keeps_last_good_snapshot_and_persists(self):
+        self.coordinator.data = {}
+        self.responses["good"] = (200,b'{"now":10000,"ac":[]}')
+        url = self.coordinator.sources["good"]["url"]
+        with patch.object(c, "flight_url", return_value=(url,45,20)), patch.object(c.time, "time", return_value=10000):
+            await self.coordinator.async_fetch_intel("flights")
+        self.responses["good"] = (503,b'down')
+        with patch.object(c, "flight_url", return_value=(url,45,20)), patch.object(c.time, "time", return_value=10100):
+            await self.coordinator.async_fetch_intel("flights")
+        self.assertEqual(self.coordinator.intel["flights"]["last_success"],10000)
+        self.assertIsNotNone(self.coordinator.intel["flights"]["error"])
+        self.coordinator.intel = {}
+        await self.coordinator.async_load()
+        self.assertEqual(self.coordinator.intel["flights"]["last_success"],10000)
+
+    async def test_satellite_requests_have_two_hour_cooldown(self):
+        self.coordinator.data = {}
+        self.responses["good"] = (200,b'[]')
+        with patch.object(c,"SATELLITE_URL",self.coordinator.sources["good"]["url"]):
+            for now in (10000,10100,17199):
+                with patch.object(c.time,"time",return_value=now):
+                    await self.coordinator.async_fetch_intel("satellites")
+            self.assertEqual(len(self.requests),1)
+            with patch.object(c.time,"time",return_value=17200):
+                await self.coordinator.async_fetch_intel("satellites")
+        self.assertEqual(len(self.requests),2)
+
+    async def test_oversized_intel_and_unknown_kind_are_rejected(self):
+        self.coordinator.data = {}
+        self.responses["good"] = (200,b'x'*(c.MAX_BYTES+1))
+        with patch.object(c,"SATELLITE_URL",self.coordinator.sources["good"]["url"]),patch.object(c.time,"time",return_value=10000):
+            await self.coordinator.async_fetch_intel("satellites")
+        self.assertIsNotNone(self.coordinator.intel["satellites"]["error"])
+        with self.assertRaises(ValueError):
+            await self.coordinator.async_fetch_intel("unknown")

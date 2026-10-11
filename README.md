@@ -1,8 +1,22 @@
-# Weltlage für Home Assistant · 1.0.1
+# Weltlage für Home Assistant · 1.1.0
 
-Ein eigener Bereich für Weltinformationen: dunkle, taktische Optik, zuerst fürs Handy gebaut. Die Übersicht kombiniert ausgewählte Nachrichten mit separaten Naturereignissen und deinen bestehenden CAP-Wetterwarnungen für **Serbien / Šumadija**. Die grosse Weltkarte öffnet sich bei Bedarf.
+Ein eigener Bereich für Weltinformationen: dunkle, taktische Optik, zuerst fürs Handy gebaut. Die Übersicht kombiniert ausgewählte Nachrichten mit separaten Naturereignissen und deinen bestehenden CAP-Wetterwarnungen für **Serbien / Šumadija**. Direkt darin steht ein drehbarer Globus mit öffentlichen Signalen. Die externe World-Monitor-Karte öffnet sich zusätzlich bei Bedarf.
 
-**Home Assistant 2026.10.0 oder neuer** · Installation und Updates über HACS · keine neuen API-Schlüssel. Die Integration enthält die Dashboardkarte und stellt sie selbst bereit. Die Veröffentlichung ersetzt keinen Live-Test in Home Assistant; Grenzen stehen in `TESTBERICHT.md`.
+![Globus auf dem Handy – synthetische Vorschau](docs/globus-mobile.png)
+
+## Neu in 1.1.0: Globus & Intel
+
+- **Drehen und zoomen:** mit einem Finger drehen, mit zwei Fingern zoomen. «Gross» öffnet eine grosse Ansicht. Tastatur: Pfeile sowie +/−.
+- **Sechs Ebenen:** Erdbeben, GDACS-Katastrophen, Flugkontakte, Satelliten, Ortsmarken und regionale CAP-Warnungen. Antippen oder über «Objekte im Globus» auswählen.
+- **Flüge laden:** öffentliche ADS-B-Aufnahme von adsb.lol, 250 nautische Meilen (463 km) um die aktuelle Globusmitte. Die Mitte wird auf ein 5°-Raster gerundet; sie stammt vom Globus. Pro HA-Installation maximal eine Abfrage pro Minute. Die gestrichelte cyanfarbene Linie zeigt den abgefragten Bereich. Beim Drehen bleibt die Aufnahme aus dieser Region erhalten, bis erneut geladen wird. **Keine automatische weltweite Fluglage.** Positionen über 120 Sekunden Alter werden entfernt, ein fehlgeschlagener Abruf ist sichtbar.
+- **Satelliten laden:** CelesTrak-Bahndaten für ISS und Raumstationen; maximal alle zwei Stunden. Positionen werden lokal mit satellite.js / SGP4 für die aktuelle Zeit berechnet. Ein gewählter Satellit zeigt die berechnete Bodenspur der nächsten 90 Minuten. Die Marker liegen auf der Bodenposition, ihre echte Höhe steht in den Details. Ältere Bahnepochen sind dort sichtbar; über 14 Tage alte Bahnsätze werden verworfen.
+- **Tag/Nacht:** angenäherte Beleuchtungsgrenze nach UTC; Ortsmarken dienen der Orientierung. CAP-Marker für RS010 stehen an der ausdrücklich als ungefähr bezeichneten Gebietsmitte Šumadija.
+
+Globus und Bibliotheken werden von deinem HA bereitgestellt; keine Laufzeit-CDNs, Schlüssel oder externe Globus-Bildkacheln. Die Zusatzdaten werden ausschliesslich über die Ladebuttons geholt. Canvas-Zeichnen pausiert ausserhalb des sichtbaren Bereichs oder in einem ausgeblendeten Browserfenster. Vorhandene RSS- und Naturereignis-Abrufe laufen wie bisher.
+
+**Update von 1.0.1:** HACS → Weltlage → ⋮ → **Erneut herunterladen**, gegebenenfalls **main** auswählen. Danach HA vollständig neu starten. Ressource bei Bedarf auf **`/weltlage/weltlage-card.js?v=1.1.0`** setzen und Browser / Companion App neu laden. Der Globus erscheint in bestehenden Weltlage-Karten automatisch. Mit `show_globe: false` lässt er sich ausblenden; dies steht auch im grafischen Editor.
+
+**Home Assistant 2026.10.0 oder neuer** · Installation und Updates über HACS · keine neuen API-Schlüssel. Die Integration enthält die Dashboardkarte samt Globus und stellt beide selbst bereit. Die Veröffentlichung ersetzt keinen Live-Test in Home Assistant; Grenzen stehen in `TESTBERICHT.md`.
 
 `VORSCHAU.html` ist eine eigenständig im Browser bedienbare Vorschau. **Alle Meldungen, Warnungen und Statusangaben darin sind Beispieldaten.** Sie zeigt dieselbe Karte wie die Installation. Nur die separat geöffnete World-Monitor-Karte kontaktiert den externen Dienst.
 
@@ -48,6 +62,7 @@ Die Karte findet die Lagebild-Entität und den Aktualisieren-Button automatisch.
 | Zeiträume | 24, 48 oder 72 Stunden; höchstens 120 zusammengeführte Meldungen. Standardmässig drei sichtbar, danach «Weitere». |
 | Warnungen | Vorhandene CAP-Alerts-Entitäten für `RS010`. Gelb/Orange/Rot getrennt aktiv und kommend. Grüne Einträge zählen nicht als besondere Warnung. |
 | Naturereignisse | USGS-Erdbeben M ≥ 4.5 der letzten 24 Stunden; GDACS Orange/Rot. GDACS-Erdbeben werden ausgelassen, damit dieselbe Ereignisart nicht doppelt gezählt wird. |
+| Globus | Lokaler drehbarer Globus mit sechs Ebenen, Details, grosser Ansicht und Tag/Nacht; Flug- und Satellitenabrufe auf Wunsch. |
 | Weltkarte | Externe kostenlose World-Monitor-Einbettung für Konflikte, Erdbeben und Wetter; öffnet im Vollbilddialog. Welt/Europa/Balkan wählbar. |
 | Datenqualität | Eigener Status je Quelle; gespeicherte Artikel werden bei Abruffehlern markiert. Warnstatus bei fehlenden CAP-Daten unbekannt. |
 | Speicherung | Letzte erfolgreiche Quelldaten in HA `.storage`; bleiben über Neustarts erhalten. RSS-Historie höchstens 72 Stunden und 50 Einträge je Quelle. |
@@ -60,21 +75,21 @@ Die Meldungszahl zählt Einträge mit einem gültigen Veröffentlichungsdatum im
 
 Für den Alltag sind **kurz lesbare Meldungen, nachvollziehbare Quellen, regionale Wetterwarnungen und sichtbar veraltete Daten** am nützlichsten. Weltlage bietet einen Einstieg in relevante Entwicklungen; Details lassen sich bei Bedarf öffnen. Nachrichten aus Serbien und der Schweiz sind schnell erreichbar, ohne die globale Sicht aufzugeben.
 
-Die Karte ist im schmalen Fenster einspaltig. Ab 760 Pixel Kartenbreite stehen Nachrichten und Zusatzbereiche nebeneinander. Die Weltkarte und eine mögliche spätere 3D-Ansicht laden erst auf ausdrücklichen Aufruf. Das reduziert Last und Ablenkung beim Lesen auf dem Handy.
+Die Karte ist im schmalen Fenster einspaltig. Ab 760 Pixel Kartenbreite stehen Nachrichten und Zusatzbereiche nebeneinander. Der lokale Globus zeigt Ereignisse räumlich; schwere externe Ansichten und zusätzliche Intel-Abfragen bleiben auf Abruf. Die Ebenen können einzeln ausgeblendet werden.
 
 ## Was nicht sinnvoll ist und hier bewusst fehlt
 
 - **Eine globale «Gefahrenampel» aus Schlagzeilen:** dafür gibt es weder eine definierte Skala noch ausreichend vollständige Daten. Medienberichte lösen hier keine Warnung aus.
 - **Automatische Alarmmeldungen für jede Weltmeldung:** zu viel Rauschen. Dieses Paket verschickt keine Push-Nachrichten und steuert keine Geräte.
 - **KI-Texte als angeblich bestätigte Lage:** es gibt keine erfundenen Zusammenfassungen, automatischen Übersetzungen oder Behauptungen einer unabhängigen Bestätigung.
-- **Eine dauerhaft laufende 3D-Erde auf der Handy-Startseite:** für diesen schnellen Informationsblick wenig hilfreich. God’s Eye ist als optional separat zu öffnende Ansicht vorgesehen.
+- **Den kompletten God’s-Eye-Stack in der HA-Karte:** die eigene Globus-Ansicht übernimmt ausgewählte öffentliche Datenquellen. Fotorealistische Gebäude, Schiffe mit AIS-Schlüssel oder zusätzliche Kameras brauchen eine separate Einrichtung und sind hier nicht enthalten.
 - **Vollständige weltweite Abdeckung:** RSS-Auswahl, Stichwortfilter und öffentliche Daten haben Lücken. Ein leerer Filter ist keine Aussage, dass weltweit nichts passiert.
 
 ## World Monitor und God’s Eye
 
 Die eingebaute kostenlose World-Monitor-Karte benötigt laut Anbieter keinen Schlüssel und aktualisiert stündlich. Sie erlaubt die drei genannten Ebenen. Flugzeuge, Schiffe und Satelliten sind nicht Teil dieser Einbettung. Die Karte meldet ihre eigene Datenlage; der Weltlage-Quellenstatus bewertet ausschliesslich unsere eigenen Feeds und CAP. Eine eingebettete Karte kann nach einem Ausfall einen älteren Zustand zeigen.
 
-Das geprüfte God’s-Eye-Repository und meine Einschätzung stehen separat in **`GODS-EYE-CHECK.md`**. Es wird mit diesem Paket nicht installiert. Sobald du eine eigene erreichbare Installation hast, kannst du in der Karte ergänzen:
+Das geprüfte God’s-Eye-Repository und meine Einschätzung stehen separat in **`GODS-EYE-CHECK.md`**. Der ursprüngliche God’s-Eye-Stack wird mit diesem Paket nicht installiert. Unser lokaler Globus greift ausgewählte Ideen und öffentliche Datenquellen daraus auf. Sobald du eine eigene erreichbare Installation hast, kannst du in der Karte ergänzen:
 
 ```yaml
 intel_url: https://deine-intel-adresse.example
@@ -90,7 +105,8 @@ Alle üblichen Einstellungen stehen auch im grafischen Karteneditor. Zusätzlich
 | --- | --- | --- |
 | `region` | `world` | Startfilter: `world`, `chrs`, `europa`, `balkan`, `ch`, `rs` |
 | `max_items` | `3` | Sichtbare Meldungen vor «Weitere», 1–12 |
-| `show_map` | `true` | Karten-Schaltfläche anzeigen |
+| `show_map` | `true` | World-Monitor-Schaltfläche anzeigen |
+| `show_globe` | `true` | Lokalen Globus anzeigen |
 | `entity` | automatische Erkennung | Lagebild-Entität explizit wählen |
 | `refresh_entity` | automatische Erkennung | Aktualisieren-Button explizit wählen |
 | `alert_areas` | `[RS010]` | CAP-Gebietscodes; leere Liste zeigt alle vorhandenen CAP-Gebiete |
@@ -122,3 +138,7 @@ Zum Entfernen Integration und Lovelace-Karte löschen, Modulressource entfernen,
 - [World Monitor: offizielle Embed-Dokumentation](https://www.worldmonitor.app/docs/embed-live-map)
 
 Die genaue Prüfung und ihre Grenzen stehen in `TESTBERICHT.md`. Dieses Repository enthält ausschliesslich Quellcode, synthetische Tests, Vorlagen und Dokumentation; keine Zugangsdaten oder HA-Exportarchive. Änderungen stehen in `CHANGELOG.md`. Lizenz: MIT.
+
+## Entwicklung
+
+Node.js 24: `npm ci`, `npm run build`, `node scripts/preview.mjs`, `npm test` und `npm run test:dom`. Für die Browserprüfung zusätzlich `npx playwright install chromium --only-shell` und `npm run test:browser`. Python: `python3 -m unittest discover -s tests -v` (aiohttp erforderlich). `frontend_src/` enthält die Globusquelle und Natural-Earth-Landdaten. `scripts/build.mjs` bündelt die Bibliotheken in die mitgelieferte ESM-Datei; die Installation benötigt weder Node.js noch npm. Lizenzen stehen in `THIRD_PARTY.md`.

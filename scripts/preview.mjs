@@ -1,0 +1,12 @@
+import {createRequire} from 'node:module';
+import {readFile,writeFile} from 'node:fs/promises';
+import {fileURLToPath} from 'node:url';
+import {resolve,dirname} from 'node:path';
+const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
+const dep=process.env.WELTLAGE_NODE_MODULES;
+const require=createRequire(import.meta.url);
+const esbuild=dep?createRequire(resolve(dep,'../package.json'))('esbuild'):require('esbuild');
+const result=await esbuild.build({entryPoints:[resolve(root,'custom_components/weltlage/frontend/weltlage-card.js')],bundle:true,format:'iife',globalName:'WeltlagePreview',write:false,minify:true,target:'es2020',nodePaths:dep?[dep]:[]});
+const fixture=await readFile(resolve(root,'scripts/preview-fixture.js'),'utf8');
+const html=`<!doctype html><html lang="de"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Weltlage · Globus-Vorschau</title><style>body{margin:0;background:#071018;color:#edf4fa;font:14px/1.5 system-ui,sans-serif}main{max-width:1060px;margin:auto;padding:10px 8px 30px}header{padding:10px 10px 15px;color:#97adbf;font-size:12px}header strong{color:#ffc66b;display:block;font-size:13px}header p{margin:3px 0}header .demo{font-family:ui-monospace,monospace;letter-spacing:1px}weltlage-card{display:block}</style><main><header><strong class="demo">DEMO · BEISPIELDATEN</strong><p>Meldungen, Warnungen, Flüge und Bahndaten sind synthetisch. Der Globus ist bedienbar.</p></header><weltlage-card></weltlage-card></main><script type="module">${(result.outputFiles[0].text+'\n'+fixture).replace(/<\/script/gi,'<\\/script')}</script></html>`;
+await writeFile(resolve(root,'VORSCHAU.html'),html);

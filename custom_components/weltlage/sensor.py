@@ -11,7 +11,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
 class WeltlageSensor(CoordinatorEntity, SensorEntity):
     _attr_has_entity_name = True
-    _unrecorded_attributes = frozenset({"articles", "hazards", "sources"})
+    _unrecorded_attributes = frozenset({"articles", "hazards", "sources", "intel"})
 
     def __init__(self, coordinator, entry, role):
         super().__init__(coordinator)

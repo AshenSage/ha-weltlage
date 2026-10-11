@@ -13,6 +13,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import DOMAIN, VERSION, FEEDS, DEFAULT_FEEDS, HAZARD_SOURCES, MAX_BYTES, RETENTION_HOURS
 from .parsers import parse_news, merge_news, parse_gdacs, parse_usgs, iso
+from .intel import SATELLITE_URL, flight_url, parse_flights, parse_satellites
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -24,6 +25,8 @@ class WeltlageCoordinator(DataUpdateCoordinator):
         self.session = async_get_clientsession(hass)
         self.store = Store(hass, 1, f"{DOMAIN}.{entry.entry_id}")
         self.cache = {}
+        self.intel = {}
+        self._intel_lock = asyncio.Lock()
         self._semaphore = asyncio.Semaphore(3)
         self._last_manual = 0
         self._force = False
@@ -36,6 +39,8 @@ class WeltlageCoordinator(DataUpdateCoordinator):
         saved = await self.store.async_load()
         if saved and isinstance(saved.get("cache"), dict):
             self.cache = {k: v for k, v in saved["cache"].items() if k in self.sources and isinstance(v, dict)}
+        if saved and isinstance(saved.get("intel"), dict):
+            self.intel = {k: v for k, v in saved["intel"].items() if k in ("flights", "satellites") and isinstance(v, dict)}
 
     async def async_manual_refresh(self):
         # The refresh button cannot turn a shared free API into a rapid poll loop.
@@ -46,7 +51,37 @@ class WeltlageCoordinator(DataUpdateCoordinator):
         await self.async_request_refresh()
 
     async def async_save(self):
-        await self.store.async_save({"cache": self.cache})
+        await self.store.async_save({"cache": self.cache, "intel": self.intel})
+
+    async def async_fetch_intel(self, kind, latitude=45, longitude=15):
+        if kind not in ("flights", "satellites"):
+            raise ValueError("Unbekannte Ebene")
+        url, lat, lon = flight_url(latitude, longitude) if kind == "flights" else (SATELLITE_URL, None, None)
+        async with self._intel_lock:
+            now = time.time()
+            old = self.intel.get(kind, {})
+            cooldown = 60 if kind == "flights" else 7200
+            if now - old.get("last_attempt", 0) < cooldown:
+                return
+            state = {**old, "last_attempt": now}
+            try:
+                async with self.session.get(url, headers={"User-Agent": f"HomeAssistant-Weltlage/{VERSION}", "Accept": "application/json"}, timeout=aiohttp.ClientTimeout(total=20)) as response:
+                    response.raise_for_status()
+                    chunks, size = [], 0
+                    async for chunk in response.content.iter_chunked(65536):
+                        size += len(chunk)
+                        if size > MAX_BYTES:
+                            raise ValueError("Intel-Antwort zu gross")
+                        chunks.append(chunk)
+                parser = parse_flights if kind == "flights" else parse_satellites
+                items = await self.hass.async_add_executor_job(parser, b"".join(chunks), now)
+                state.update(items=items, last_success=now, error=None, latitude=lat, longitude=lon, radius_nm=250 if kind == "flights" else None)
+            except (aiohttp.ClientError, TimeoutError, ValueError, KeyError, TypeError) as err:
+                state["error"] = "Zeitüberschreitung" if isinstance(err, TimeoutError) else "Intel-Quelle nicht erreichbar" if isinstance(err, aiohttp.ClientError) else "Intel-Daten konnten nicht verarbeitet werden"
+            self.intel[kind] = state
+            if self.data is not None:
+                self.async_set_updated_data({**self.data, "intel": dict(self.intel)})
+            await self.async_save()
 
     async def _fetch(self, key, source, now, force):
         old = self.cache.get(key, {})
@@ -114,5 +149,5 @@ class WeltlageCoordinator(DataUpdateCoordinator):
         articles = merge_news(news, now)
         good = sum(s["status"] == "ok" for s in source_rows)
         news_times = [s["last_success"] for s in source_rows if s["kind"] == "news" and s["last_success"]]
-        self.store.async_delay_save(lambda: {"cache": self.cache}, 10)
-        return {"integration": DOMAIN, "version": VERSION, "articles": articles, "hazards": sorted(hazards, key=lambda h: h.get("published") or 0, reverse=True), "sources": source_rows, "status": "ok" if good == len(source_rows) else "partial" if good else "unavailable", "current_sources": good, "total_sources": len(source_rows), "news_last_success": max(news_times, default=None), "generated_at": iso(now), "news_24h": sum(a.get("published") is not None and now - a["published"] <= 86400 for a in articles)}
+        self.store.async_delay_save(lambda: {"cache": self.cache, "intel": self.intel}, 10)
+        return {"integration": DOMAIN, "version": VERSION, "articles": articles, "intel": dict(self.intel), "hazards": sorted(hazards, key=lambda h: h.get("published") or 0, reverse=True), "sources": source_rows, "status": "ok" if good == len(source_rows) else "partial" if good else "unavailable", "current_sources": good, "total_sources": len(source_rows), "news_last_success": max(news_times, default=None), "generated_at": iso(now), "news_24h": sum(a.get("published") is not None and now - a["published"] <= 86400 for a in articles)}

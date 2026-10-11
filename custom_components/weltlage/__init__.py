@@ -1,13 +1,23 @@
 """Weltlage custom integration."""
 from homeassistant.const import Platform
+from homeassistant.exceptions import HomeAssistantError
+import voluptuous as vol
 from .coordinator import WeltlageCoordinator
 from .frontend import async_register_frontend
+from .const import DOMAIN
 
 PLATFORMS = [Platform.SENSOR, Platform.BUTTON]
 
 
 async def async_setup(hass, config):
     await async_register_frontend(hass)
+    async def fetch_intel(call):
+        entries = hass.config_entries.async_entries(DOMAIN)
+        coordinator = next((getattr(entry, "runtime_data", None) for entry in entries if getattr(entry, "runtime_data", None)), None)
+        if coordinator is None:
+            raise HomeAssistantError("Weltlage ist noch nicht eingerichtet")
+        await coordinator.async_fetch_intel(call.data["kind"], call.data.get("latitude", 45), call.data.get("longitude", 15))
+    hass.services.async_register(DOMAIN, "fetch_intel", fetch_intel, schema=vol.Schema({vol.Required("kind"): vol.In(["flights", "satellites"]), vol.Optional("latitude", default=45): vol.All(vol.Coerce(float), vol.Range(min=-90, max=90)), vol.Optional("longitude", default=15): vol.All(vol.Coerce(float), vol.Range(min=-180, max=180))}))
     return True
 
 

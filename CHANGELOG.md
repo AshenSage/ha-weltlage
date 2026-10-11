@@ -1,5 +1,14 @@
 # Änderungen
 
+## 1.1.0 · 11.10.2026
+
+- Drehbarer Globus direkt in der Karte mit Touch-/Tastaturbedienung, Zoom, grosser Ansicht, Tag/Nacht und sechs schaltbaren Ebenen.
+- USGS-/GDACS-Ereignisse, Ortsmarken und als ungefähr gekennzeichnete regionale CAP-Marker antippbar.
+- Öffentliche Flugaufnahme von adsb.lol im gewählten 250-sm-Ausschnitt auf Abruf; alte Positionen verschwinden nach 120 Sekunden.
+- CelesTrak-Raumstationen-Bahndaten auf Abruf; lokale SGP4-Positionen und 90-Minuten-Bodenspur bei Auswahl.
+- Begrenzter, persistenter Intel-Cache und Service `weltlage.fetch_intel`; grosse Attribute werden nicht im Recorder gespeichert.
+- Bibliotheken und Landdaten lokal gebündelt; Drittanbieter-Lizenzen und reproduzierbare Build-/Vorschau-Skripte.
+
 ## 1.0.1 · 11.10.2026
 
 - Bereitstellung als HACS Custom Repository (Integration).
