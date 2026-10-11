@@ -1,5 +1,14 @@
 # Änderungen
 
+## 1.1.1 · 11.10.2026
+
+- Kompakte Handy-Meldungen: drei Titelzeilen in der Vorschau, vollständiger Titel beim Öffnen; dauernd wiederholter Medienbericht-Badge entfällt.
+- Suche, Sprach- und Quellenfilter mit Rücksetzen und sichtbarer Trefferzahl.
+- Mehrere Themen pro Bericht, Konfliktbezug vor Energiebezug; erneute Zuordnung gespeicherter Artikel bei der Zusammenführung.
+- Kartenversion direkt sichtbar, Integration und Globuseinstellung im Quellenbereich; unterschiedliche Versionen werden angezeigt.
+- Regionaler Warnzähler trägt den konfigurierten Gebietsnamen.
+- World-Monitor-Dialog mit flexibler Kartenhöhe und Platz für Bildschirmränder; Hinweis bleibt auch im Querformat sichtbar.
+
 ## 1.1.0 · 11.10.2026
 
 - Drehbarer Globus direkt in der Karte mit Touch-/Tastaturbedienung, Zoom, grosser Ansicht, Tag/Nacht und sechs schaltbaren Ebenen.

@@ -60,6 +60,20 @@ class ParserTests(unittest.TestCase):
         b = {**a, "id": "b", "url": "https://example.org/b", "first_seen": NOW - 13 * 3600}
         self.assertEqual(len(p.merge_news([a, b], NOW)), 2)
 
+    def test_attack_on_refineries_is_conflict_and_energy_in_cyrillic(self):
+        body = rss('<item><title>Напади на рафинерије нафте; разговори о изборима</title><link>/attack</link></item>')
+        article = p.parse_news(body, "test", SOURCE, NOW)[0]
+        self.assertEqual(article["category"], "konflikte")
+        self.assertEqual(article["topics"], ["konflikte", "energie", "politik"])
+
+    def test_cached_and_deduplicated_articles_keep_multiple_topics(self):
+        a = {"id": "a", "title": "Attack on oil refinery", "summary": "", "url": "https://example.org/a", "first_seen": NOW, "published": None, "category": "energie", "regions": ["world"], "sources": [{"id": "a"}]}
+        b = {**a, "summary": "Government election", "sources": [{"id": "b"}]}
+        article = p.merge_news([a, b], NOW)[0]
+        self.assertEqual(article["category"], "konflikte")
+        self.assertEqual(article["topics"], ["konflikte", "energie", "politik"])
+        self.assertNotIn("topics", a)
+
     def test_usgs_magnitude_dates_and_coordinates(self):
         def feature(ident, mag=4.5, ts=NOW - 3600, coords=None):
             return {"id": ident, "properties": {"mag": mag, "time": ts * 1000, "place": "Serbia", "url": "https://earthquake.usgs.gov/test"}, "geometry": {"coordinates": coords or [20, 44, 10]}}

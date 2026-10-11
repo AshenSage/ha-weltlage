@@ -33,6 +33,12 @@ test('missing publication date is displayed honestly', () => {
   assert.equal(age(now / 1000 - 600, now), 'vor 10 Min.');
   assert.equal(age(now / 1000 + 600, now), 'Zeitangabe prüfen');
 });
+test('multiple topics, language, publisher and all search words compose', () => {
+  const a = { published: now / 1000 - 600, title: 'Напади на нафту', summary: 'Oil refinery attack', language: 'sr', category: 'konflikte', topics: ['konflikte', 'energie'], sources: [{name:'RTS'}, {name:'BBC'}] };
+  assert.equal(filterArticles([a], 'world', 'energie', 24, now, {language:'sr', source:'RTS', query:'НАПАДИ refinery'}).length, 1);
+  for (const options of [{language:'de'}, {source:'SRF'}, {query:'refinery economy'}]) assert.equal(filterArticles([a], 'world', 'all', 24, now, options).length, 0);
+  assert.equal(filterArticles([a], 'world', 'all', 24, now, {source:'BBC', query:' bBc  oil '}).length, 1);
+});
 test('green CAP records do not become alarms despite raw counter', () => {
   const states = base();
   states['sensor.count'].state = '28';

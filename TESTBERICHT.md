@@ -1,19 +1,19 @@
-# Prüfung · Weltlage 1.1.0
+# Prüfung · Weltlage 1.1.1
 
-Stand: 11.10.2026. Gebaut für die Konfiguration im bereitgestellten HA-Export (Home Assistant 2026.10.0). **Das Paket ist nicht in der laufenden HA-Instanz installiert.**
+Stand: 11.10.2026. Für Home Assistant 2026.10.0 oder neuer. **Version 1.1.1 wurde lokal geprüft; ihr Betrieb in einer laufenden Home-Assistant-Instanz wurde nicht verifiziert.**
 
 ## Erfolgreich geprüft
 
 | Prüfung | Ergebnis |
 | --- | --- |
-| Python-Verarbeitung und Datensammler | 26 Tests bestanden. RSS/Atom, Datumsangaben, HTML-Bereinigung, Links, Zusammenführung, Aufbewahrung und Naturereignisse. |
+| Python-Verarbeitung und Datensammler | 28 Tests bestanden. RSS/Atom, Datumsangaben, HTML-Bereinigung, Links, Zusammenführung, Aufbewahrung, Naturereignisse sowie mehrere Themen und erneute Themenzuordnung gespeicherter Meldungen. |
 | HTTP-Verhalten des tatsächlichen Datensammlers | Lokaler HTTP-Testserver: ein Feed funktioniert, ein Feed fällt aus; bedingter Abruf mit 304; beschädigte/überdimensionierte Antwort; Speicherung; Wiederholungsabstand; manueller Abruf. |
 | Mitgelieferte Karte / HTTP-Pfad | 3 Tests bestanden: ausschliesslich die beiden Karten-/Globus-Dateien werden bereitgestellt, kein Langzeit-Cache, keine doppelte Registrierung beim Neuladen; nach Fehler erneut registrierbar. Bestehende Lovelace-Ressourcen bleiben unberührt. |
 | Intel-Abrufe | Feste API-Hosts, 2-MB-Grenze, gültige Koordinaten und Bahndaten, Aufnahmealter, 60-s-/2-h-Abstände, Fehlerstatus und Cache-Speicherung geprüft. Kein Abruf ohne ausdrückliche Anfrage. |
-| Chromium-Bedienung | 22 Prüfungen bestanden. Handybreiten 320/360/390/430 und Desktop 1060 Pixel: keine seitlichen Überstände; Ziehen, Tastatur, Touch-Pinch, Punkt-/Listenauswahl, Ebenen, Intel-Anfrage, Bodenspur, native grosse Dialogansicht, Escape, Ausblenden und tatsächliche ESM-Dateien über lokale HTTP-Pfade geprüft. |
+| Chromium-Bedienung | 32 Prüfungen bestanden. Handybreiten 320/360/390/430 und Desktop 1060 Pixel: keine seitlichen Überstände; Ziehen, Tastatur, Touch-Pinch, Punkt-/Listenauswahl, Ebenen, Intel-Anfrage, Bodenspur, native grosse Dialogansicht, Escape, Ausblenden und tatsächliche ESM-Dateien über lokale HTTP-Pfade geprüft. Zusätzlich: kompakte lange kyrillische Titel und vollständiges Aufklappen, kombinierte Sprach-/Quellenfilter, Suche ohne Fokusverlust und Versionshinweis. World-Monitor-Dialog bei 320×640, 390×844 und 844×390: Kopf und Hinweis innerhalb des Bildschirms, positive Kartenhöhe. Externe Karte dabei durch synthetischen iframe-Inhalt ersetzt; geprüft wird das Dialoglayout, nicht die Anbieterantwort. |
 | Direkte öffentliche APIs | adsb.lol-Punktabfrage und CelesTrak-Raumstationen-OMM-JSON haben am 11.10.2026 aus der Entwicklungsumgebung geantwortet. Das ist keine Erreichbarkeitsprüfung aus deiner HA-Installation. |
-| Reine Kartenlogik | 13 Node-Tests bestanden: Filter, Datenalter, Links/HTML, CAP-Stufen, Aktiv/Kommend, Ablauf, Doppelte und fehlende/veraltete Warnquellen. |
-| DOM-Bedienlogik | 35 Assertions bestanden mit jsdom: tatsächlicher Kartencode, Filter, weitere Meldungen, erneute Konfiguration, offene Details, Aktualisieren-Aufruf, Karten-URL und Entfernen des Frames, wiederholte Editoränderungen, gespeicherte Daten bei Fehlern, leere Einrichtung. |
+| Reine Kartenlogik | 14 Node-Tests bestanden: Mehrfachthemen, Suchwörter, Sprache/Quelle, Region/Zeit, Datenalter, Links/HTML, CAP-Stufen, Aktiv/Kommend, Ablauf, Doppelte und fehlende/veraltete Warnquellen. |
+| DOM-Bedienlogik | 45 Assertions bestanden mit jsdom: tatsächlicher Kartencode, Filter, weitere Meldungen, erneute Konfiguration, offene Details, Aktualisieren-Aufruf, Karten-URL und Entfernen des Frames, wiederholte Editoränderungen, gespeicherte Daten bei Fehlern, leere Einrichtung; Suche, kombinierte Filter, Trefferzahl, kompakter Editor und Versionsunterschiede. |
 | CAP-Regressionsprüfung am Export | Alle 28 exportierten CAP-Einträge zum Exportzeitpunkt geprüft. Filter `RS010`: 0 besondere aktive und 0 besondere kommende Warnungen. Grüne Einträge bleiben ausserhalb der Alarmzahl. |
 | Syntax und Paket | Python-Kompilierung, JavaScript-Syntax, JSON und YAML geprüft. Veröffentlichte Dateien enthalten keine Exportdaten, Zugangsdaten, node_modules oder temporären Dateien. |
 
@@ -37,7 +37,7 @@ Im entpackten Paket, für die Python-Tests mit Python 3.12+ und `aiohttp`:
 python3 -m unittest discover -s tests -v
 ```
 
-Für die 13 JavaScript-Tests genügt Node ohne Zusatzpakete:
+Für die 14 JavaScript-Tests genügt Node ohne Zusatzpakete:
 
 ```bash
 npm test
@@ -53,7 +53,7 @@ npm run test:dom
 ## Nach der Installation kontrollieren
 
 1. Weltlage-Lagebild und Quellenstatus sind vorhanden. Mindestens die gewünschten Nachrichtenquellen melden erfolgreiche Abrufe.
-2. Welt → CH/RS → Serbien wechseln. Thema und Zeitraum ändern; Details und «Weitere» öffnen.
+2. Oben «Karte 1.1.1» und unter Quellen die Integrationsversion prüfen. Welt → CH/RS → Serbien wechseln. Thema, Zeitraum, Sprache und Quelle ändern; suchen und Filter zurücksetzen. Langen Titel vollständig aufklappen; «Weitere» öffnen.
 3. CAP-Zeitstempel ist aktuell. Grüne Meldungen bleiben ohne Alarmzahl; abgelaufene Warnungen verschwinden. Bei veralteter CAP-Quelle steht «Warnstatus prüfen».
 4. Handy hochkant: Globus drehen und mit zwei Fingern zoomen; «Gross» öffnen/schliessen. Erdbeben antippen. «Flüge laden» und «Satelliten laden» prüfen; bei Ausfall muss ein Datenhinweis erscheinen. World-Monitor-Karte zusätzlich öffnen/schliessen.
 5. Nach einem HA-Neustart und einem vorübergehenden Quellenfehler prüfen, ob gespeicherte Meldungen sichtbar bleiben und ihr Datenstatus stimmt.

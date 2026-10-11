@@ -127,12 +127,19 @@ _REGION_WORDS = {
     "europa": r"\b(?:europa\w*|europe\w*|европ\w*|european|deutschland|german\w*|frankreich|france|french|italien|italy|italian|österreich|austria|ukraine|ukrain\w*|украјин\w*|polen|poland|spanien|spain|britain|british|london|russia|russland)\b",
 }
 _TOPICS = [
-    ("energie", r"\b(?:energie\w*|energy|oil|gas|fuel|diesel|erdöl|ölpreis\w*|strom\w*|pipeline\w*|lieferkett\w*|supply chain\w*|shipping|trade route\w*|нафт\w*|енерг\w*|горив\w*|дизел\w*)\b"),
     ("konflikte", r"\b(?:krieg\w*|war|wars|missile\w*|attack\w*|angriff\w*|waffenstillstand|ceasefire|military|militär\w*|invasion|ракет\w*|напад\w*|рат|рата|рату|сукоб\w*)\b"),
     ("natur", r"\b(?:earthquake\w*|erdbeben|flood\w*|überschwemm\w*|hurricane\w*|unwetter\w*|wildfire\w*|waldbrand\w*|поплав\w*|земљотрес\w*|олуј\w*)\b"),
+    ("energie", r"\b(?:energie\w*|energy|oil|gas|fuel|diesel|erdöl|ölpreis\w*|strom\w*|pipeline\w*|lieferkett\w*|supply chain\w*|shipping|trade route\w*|нафт\w*|енерг\w*|горив\w*|дизел\w*)\b"),
     ("wirtschaft", r"\b(?:econom\w*|wirtschaft\w*|inflation|tariff\w*|zoll\w*|zölle|central bank\w*|interest rate\w*|економ\w*|инфлац\w*|царин\w*)\b"),
     ("technik", r"\b(?:technology|technolog\w*|cyber\w*|artificial intelligence|künstliche intelligenz|технолог\w*)\b"),
+    ("politik", r"\b(?:election\w*|wahl\w*|diplom\w*|government\w*|regierung\w*|parlament\w*|president\w*|präsident\w*|minister\w*|избор\w*|председник\w*|влада|владе|влади|владу|владом|диплом\w*)\b"),
 ]
+
+
+def classify_topics(text, source):
+    """Keep every keyword match; primary topic follows the order above."""
+    topics = [name for name, pattern in _TOPICS if re.search(pattern, text, re.I)]
+    return topics or [source.get("category", "politik")]
 
 
 def classify(text, source):
@@ -147,7 +154,7 @@ def classify(text, source):
         regions.add("europa")
     if "rs" in regions:
         regions.add("balkan")
-    category = next((name for name, pattern in _TOPICS if re.search(pattern, text, re.I)), source.get("category", "politik"))
+    category = classify_topics(text, source)[0]
     return sorted(regions), category
 
 
@@ -174,7 +181,8 @@ def parse_news(body, source_id, source, now):
             "id": sha256(canonical_url(url).encode()).hexdigest()[:20],
             "title": title, "summary": summary, "url": url,
             "published": published, "first_seen": now,
-            "regions": regions, "category": category, "language": source.get("language", ""),
+            "regions": regions, "category": category,
+            "topics": classify_topics(title + " " + summary, source), "language": source.get("language", ""),
             "sources": [{"id": source_id, "name": source.get("publisher", source["name"]), "url": url}],
         })
     return result
@@ -185,6 +193,9 @@ def merge_news(items, now):
     valid.sort(key=lambda a: (a.get("published") or a.get("first_seen", 0)), reverse=True)
     by_url, by_title, result = {}, {}, []
     for a in valid:
+        # Reclassify last-good cached articles too, including after a HTTP 304.
+        a["topics"] = classify_topics(a["title"] + " " + a.get("summary", ""), {"category": a.get("category", "politik")})
+        a["category"] = a["topics"][0]
         url = canonical_url(a["url"])
         title = re.sub(r"[^\w]+", " ", a["title"].lower()).strip()
         match = by_url.get(url)
@@ -194,6 +205,10 @@ def merge_news(items, now):
         if match is not None:
             match["sources"] = list({s["id"]: s for s in match["sources"] + a["sources"]}.values())
             match["regions"] = sorted(set(match["regions"] + a["regions"]))
+            combined = set(match["topics"] + a["topics"])
+            ordered = [name for name, _ in _TOPICS if name in combined]
+            match["topics"] = ordered + sorted(combined - set(ordered))
+            match["category"] = match["topics"][0]
             match["first_seen"] = min(match["first_seen"], a["first_seen"])
             continue
         a["sources"] = list(a["sources"])

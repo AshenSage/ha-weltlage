@@ -1,8 +1,18 @@
-# Weltlage für Home Assistant · 1.1.0
+# Weltlage für Home Assistant · 1.1.1
 
 Ein eigener Bereich für Weltinformationen: dunkle, taktische Optik, zuerst fürs Handy gebaut. Die Übersicht kombiniert ausgewählte Nachrichten mit separaten Naturereignissen und deinen bestehenden CAP-Wetterwarnungen für **Serbien / Šumadija**. Direkt darin steht ein drehbarer Globus mit öffentlichen Signalen. Die externe World-Monitor-Karte öffnet sich zusätzlich bei Bedarf.
 
 ![Globus auf dem Handy – synthetische Vorschau](docs/globus-mobile.png)
+
+## Neu in 1.1.1: Mobile Übersicht
+
+- Kompakte Meldungen mit höchstens drei Titelzeilen. Aufklappen zeigt den vollständigen Titel und RSS-Kurztext. Der wiederholte «Medienbericht»-Badge entfällt; Hinweise auf veraltete Quellen bleiben sichtbar.
+- Suche in Titel, Kurztext und Quellennamen. Alle Suchwörter müssen vorkommen. Sprache und Quelle sind separat filterbar; kombinierte Filter lassen sich mit einem Knopf zurücksetzen.
+- Mehrere Themen je Artikel: Ein Angriff auf eine Ölraffinerie erscheint beispielsweise unter Konflikten und Energie. Die Zuordnung erfolgt weiterhin über Stichwörter, auch bei bereits gespeicherten Meldungen.
+- Sichtbare Kartenversion, Integrationsversion unter «Quellen & Datenalter» und Hinweis bei unterschiedlichen Versionen. Dort steht auch, ob der Globus ausgeblendet wurde.
+- Der World-Monitor-Dialog passt die Kartenhöhe an Kopfzeile, Hinweis und Bildschirmränder an; keine feste Höhe mit abgeschnittenem Hinweis.
+
+[Mobile Meldungsvorschau mit synthetischen Beispieldaten](docs/mobile-meldungen.png). Der Globus ist für diese zusätzliche Vorschau über die vorhandene Option ausgeblendet.
 
 ## Neu in 1.1.0: Globus & Intel
 
@@ -14,7 +24,7 @@ Ein eigener Bereich für Weltinformationen: dunkle, taktische Optik, zuerst für
 
 Globus und Bibliotheken werden von deinem HA bereitgestellt; keine Laufzeit-CDNs, Schlüssel oder externe Globus-Bildkacheln. Die Zusatzdaten werden ausschliesslich über die Ladebuttons geholt. Canvas-Zeichnen pausiert ausserhalb des sichtbaren Bereichs oder in einem ausgeblendeten Browserfenster. Vorhandene RSS- und Naturereignis-Abrufe laufen wie bisher.
 
-**Update von 1.0.1:** HACS → Weltlage → ⋮ → **Erneut herunterladen**, gegebenenfalls **main** auswählen. Danach HA vollständig neu starten. Ressource bei Bedarf auf **`/weltlage/weltlage-card.js?v=1.1.0`** setzen und Browser / Companion App neu laden. Der Globus erscheint in bestehenden Weltlage-Karten automatisch. Mit `show_globe: false` lässt er sich ausblenden; dies steht auch im grafischen Editor.
+**Update auf 1.1.1:** HACS → Weltlage → ⋮ → **Erneut herunterladen**, gegebenenfalls **main** auswählen. Danach HA vollständig neu starten. Die bestehende Ressource auf **`/weltlage/weltlage-card.js?v=1.1.1`** setzen und Browser / Companion App neu laden. Der Globus erscheint in bestehenden Weltlage-Karten automatisch. Mit `show_globe: false` lässt er sich ausblenden; dies steht auch im grafischen Editor. Oben muss «Karte 1.1.1» erscheinen.
 
 **Home Assistant 2026.10.0 oder neuer** · Installation und Updates über HACS · keine neuen API-Schlüssel. Die Integration enthält die Dashboardkarte samt Globus und stellt beide selbst bereit. Die Veröffentlichung ersetzt keinen Live-Test in Home Assistant; Grenzen stehen in `TESTBERICHT.md`.
 
@@ -58,7 +68,8 @@ Die Karte findet die Lagebild-Entität und den Aktualisieren-Button automatisch.
 | --- | --- |
 | Nachrichten | SRF International, Wirtschaft und Schweiz; BBC World und Europe; RTS Serbien. Quellen sind in den Integrationsoptionen auswählbar. |
 | Regionen | Welt, CH/RS, Europa, Balkan, Schweiz, Serbien. Ein Artikel kann zu mehreren Regionen gehören. |
-| Themen | Politik, Konflikte, Energie/Handel, Wirtschaft, Natur, Technik. Einfache Stichwortzuordnung; keine KI-Wahrheitsbewertung. |
+| Themen | Politik, Konflikte, Energie/Handel, Wirtschaft, Natur, Technik. Mehrere Stichwortzuordnungen möglich; keine KI-Wahrheitsbewertung. |
+| Meldungsfilter | Suchwörter in Titel/Kurztext/Quellennamen, Sprache und Quelle; mit Region, Thema und Zeitraum kombinierbar. |
 | Zeiträume | 24, 48 oder 72 Stunden; höchstens 120 zusammengeführte Meldungen. Standardmässig drei sichtbar, danach «Weitere». |
 | Warnungen | Vorhandene CAP-Alerts-Entitäten für `RS010`. Gelb/Orange/Rot getrennt aktiv und kommend. Grüne Einträge zählen nicht als besondere Warnung. |
 | Naturereignisse | USGS-Erdbeben M ≥ 4.5 der letzten 24 Stunden; GDACS Orange/Rot. GDACS-Erdbeben werden ausgelassen, damit dieselbe Ereignisart nicht doppelt gezählt wird. |
@@ -67,7 +78,7 @@ Die Karte findet die Lagebild-Entität und den Aktualisieren-Button automatisch.
 | Datenqualität | Eigener Status je Quelle; gespeicherte Artikel werden bei Abruffehlern markiert. Warnstatus bei fehlenden CAP-Daten unbekannt. |
 | Speicherung | Letzte erfolgreiche Quelldaten in HA `.storage`; bleiben über Neustarts erhalten. RSS-Historie höchstens 72 Stunden und 50 Einträge je Quelle. |
 
-Meldungen bleiben in der Sprache ihrer Quelle: Deutsch, Englisch bzw. Serbisch. Kurztexte stammen aus dem RSS-Feed; vollständige Artikel öffnen beim Anbieter. Offensichtlich gleiche URLs bzw. längere identische Überschriften in engem Zeitabstand werden zusammengeführt. Ähnliche Berichte können trotzdem mehrfach erscheinen.
+Meldungen bleiben in der Sprache ihrer Quelle: Deutsch, Englisch bzw. Serbisch. Der Sprachfilter zeigt ausgewählte Originalsprachen und übersetzt nicht. Kurztexte stammen aus dem RSS-Feed; vollständige Artikel öffnen beim Anbieter. Offensichtlich gleiche URLs bzw. längere identische Überschriften in engem Zeitabstand werden zusammengeführt. Ähnliche Berichte können trotzdem mehrfach erscheinen.
 
 Die Meldungszahl zählt Einträge mit einem gültigen Veröffentlichungsdatum im gewählten Filter. Undatierte Einträge tragen «Datum fehlt» und bleiben ab ihrer ersten Erfassung höchstens 72 Stunden sichtbar. «Erfolgreicher Abruf» bedeutet, dass die Quelle erreichbar und verarbeitet wurde; der neueste Artikel kann trotzdem älter sein.
 
@@ -105,6 +116,7 @@ Alle üblichen Einstellungen stehen auch im grafischen Karteneditor. Zusätzlich
 | --- | --- | --- |
 | `region` | `world` | Startfilter: `world`, `chrs`, `europa`, `balkan`, `ch`, `rs` |
 | `max_items` | `3` | Sichtbare Meldungen vor «Weitere», 1–12 |
+| `compact_news` | `true` | Vorschau auf drei Titelzeilen begrenzen; aufgeklappt vollständig |
 | `show_map` | `true` | World-Monitor-Schaltfläche anzeigen |
 | `show_globe` | `true` | Lokalen Globus anzeigen |
 | `entity` | automatische Erkennung | Lagebild-Entität explizit wählen |
@@ -121,6 +133,7 @@ CAP-Sensoren mit HA-Zustand `unknown` sind nutzbar, wenn ihre CAP-Attribute gül
 
 - Integration nicht gefunden: Ordnerpfad kontrollieren; `manifest.json` muss direkt unter `/config/custom_components/weltlage/` liegen. HA nach dem Kopieren neu starten.
 - «Custom element doesn't exist»: Modulressource kontrollieren, Browser/Companion App neu laden. Bei Updates den Versionsparameter der Ressource erhöhen.
+- Globus fehlt / alte Ansicht: Oben «Karte 1.1.1» kontrollieren. Fehlt diese Anzeige, wird noch älterer Kartencode geladen. HACS erneut herunterladen, HA vollständig neu starten und genau eine Weltlage-Modulressource `/weltlage/weltlage-card.js?v=1.1.1` verwenden. Eine alte `/local/weltlage/…`-Ressource ersetzen. Danach die Companion App vollständig schliessen und öffnen. Steht die aktuelle Version da, im Karteneditor «3D-Globus anzeigen» aktivieren bzw. `show_globe: false` entfernen.
 - Einzelne Quelle ausgefallen: Quellenbereich öffnen. Andere Quellen laufen weiter; letzte erfolgreiche Daten bleiben sichtbar. DNS/Internet des HA-Systems und HA-Protokolle prüfen.
 - CAP «Daten prüfen»: Zähler, Letzter-Abruf-Entität und Gebietscode kontrollieren. Der rohe CAP-Zähler kann auch grüne Einträge zählen und ist daher keine Alarmzahl.
 - Weltkarte leer: World Monitor muss vom Handy aus erreichbar sein. Bei eigener Content Security Policy muss die Domain für Frames erlaubt sein.
