@@ -1,16 +1,14 @@
-# Komplettes separates Dashboard; alternativ nur weltlage-ansicht.yaml verwenden.
-title: Weltlage
+title: "GOD'S EYE"
 views:
-  - title: Weltlage
+  - title: "GOD'S EYE"
     path: weltlage
     icon: mdi:earth
     type: panel
     cards:
       - type: custom:weltlage-card
-        title: Weltlage
-        max_items: 3
+        title: "GOD'S EYE"
+        region: world
         alert_count_entity: sensor.cap_alerts_wmo_alert_count
         alert_updated_entity: sensor.cap_alerts_wmo_last_updated
-        alert_areas:
-          - RS010
+        alert_areas: [RS010]
         alert_label: Serbien · Šumadija

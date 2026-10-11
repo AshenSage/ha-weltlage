@@ -20,15 +20,13 @@ Es bringt viele öffentliche Signale auf eine 3D-Erde. Der praktische Mehrwert l
 
 Grundfunktionen starten ohne Schlüssel. Für fotorealistische 3D-Daten gibt es Cesium-ion-Zugang für berechtigte private, nicht kommerzielle Nutzung innerhalb der Bedingungen/Quoten; die direkte Google-Variante ist verbrauchsabhängig abgerechnet. OpenAI-Sprachfunktionen sind optional und über den regulären API-Zugang zusätzlich kostenpflichtig.
 
-## Was ich für uns übernehmen würde
+## Was jetzt direkt in HA enthalten ist
 
-**Seit Weltlage 1.1.0 direkt in HA:** drehbarer Globus, öffentliche ADS-B-Flugaufnahme im gewählten Ausschnitt, ISS-/Raumstationen-Bahndaten mit lokaler SGP4-Berechnung und antippbare USGS-/GDACS-Ereignisse. CAP und statische Ortsmarken ergänzen den räumlichen Blick. Quelle, Aufnahmealter und berechnete Satellitenpositionen sind gekennzeichnet. Die Datenquellen-Ideen stammen aus dem Repo; dessen Code oder 3D-Modelle wurden nicht kopiert.
+**Weltlage 1.2.0 konzentriert sich ausschliesslich auf den Globus.** Neben ADS-B, SGP4, USGS, GDACS und CAP enthält die eigene HA-Karte nun öffentliche TfL-, Fintraffic- und DriveBC-Kameras mit Bildansicht, Kameracluster, ISS-Folgen, optionaler Flugaktualisierung und einen wählbaren Esri-Satellitenhintergrund. Das grüne taktische Erscheinungsbild ist ein Darstellungsstil. Aufnahmen, Beobachtungen und berechnete Positionen sind getrennt gekennzeichnet.
 
-**Danach:** God’s Eye separat auf einem Rechner oder eigenen Server betreiben und über «3D Intel öffnen» aufrufen. Für deine Anwendung wären Balkan/Europa, Flughäfen, Wetter und grössere Naturereignisse gute Einstiege. Satelliten sind eine interessante Zusatzansicht; aus ihrer blossen Nähe sollte kein Gefahrenalarm entstehen.
+Nachrichtenbereich und World-Monitor-Iframe wurden entfernt. Die Datenquellen-Ideen stammen aus dem ursprünglichen Repo; dessen Code, 3D-Modelle und Kameraprojektionen wurden nicht kopiert. Eine separate Installation ist für den eigenen HA-Globus nicht erforderlich.
 
-Die separate Ansicht bleibt die Option für den vollständigen God’s-Eye-Umfang, insbesondere fotorealistische 3D-Daten, AIS-Schiffe oder weitere Kameras. Unser eigener Globus wurde in Chromium bei Handybreiten geprüft; die ursprüngliche God’s-Eye-App wurde nicht auf deinem Handy gemessen. Ich habe das Repo nicht auf deinem Gerät gestartet. Ein eigener Rechner/Server ist ebenfalls noch nicht eingerichtet.
-
-**Später bei Bedarf:** einzelne zusätzliche Datenquellen direkt in die HA-Integration übernehmen, etwa FIRMS-Brände. Dabei bleiben Quelle, Alter, Schwelle und räumlicher Bezug sichtbar. Eine God’s-Eye-Oberfläche ist keine vorausgesetzte HA-Daten-API.
+Nicht enthalten: Google-/Cesium-Fotorealismus mit 3D-Gebäuden, AIS-Schiffe, NASA-FIRMS-Schlüsselquellen oder eine freie weltweite Kameraabdeckung. Die ursprüngliche God’s-Eye-App wurde nicht auf dem Gerät des Nutzers installiert. Die folgenden Startangaben dienen nur als Referenz zum fremden Projekt.
 
 ## Technischer Einstieg
 
@@ -42,6 +40,6 @@ npm run doctor
 npm run dev
 ```
 
-Standardadresse ist `http://localhost:4173`. Für Handy-Zugriff braucht es eine erreichbare eigene Adresse; dafür die [LAN-/Server-Hinweise des Projekts](https://github.com/bilawalsidhu/gods-eye-view/blob/main/SECURITY.md) befolgen. In Weltlage lässt sich diese später per `intel_url` hinterlegen.
+Standardadresse ist `http://localhost:4173`. Für Handy-Zugriff braucht es eine erreichbare eigene Adresse; dafür die [LAN-/Server-Hinweise des Projekts](https://github.com/bilawalsidhu/gods-eye-view/blob/main/SECURITY.md) befolgen. Eine separate Installation ist unabhängig von der neuen HA-Globuskarte.
 
 Quellen: [README](https://github.com/bilawalsidhu/gods-eye-view), [DATA_SOURCES.md](https://github.com/bilawalsidhu/gods-eye-view/blob/main/DATA_SOURCES.md). Anbieterbedingungen und Quoten können sich ändern.

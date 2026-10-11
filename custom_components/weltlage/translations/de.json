@@ -1,12 +1,24 @@
 {
   "title": "Weltlage",
   "config": {
-    "step": {"user": {"title": "Weltlage einrichten", "description": "Nachrichten aus deiner Quellenauswahl, USGS-Erdbeben und GDACS-Naturereignisse. Ohne API-Schlüssel. Regionale Warnungen liest die Karte aus deiner bestehenden CAP-Alerts-Integration.", "data": {"feeds": "Nachrichtenquellen", "interval": "Nachrichten-Abrufintervall (Minuten)"}}},
-    "error": {"select_feeds": "Wähle mindestens eine gültige Nachrichtenquelle."},
-    "abort": {"already_configured": "Weltlage ist bereits eingerichtet."}
+    "step": {
+      "user": {
+        "title": "Weltlage einrichten",
+        "description": "Globus mit öffentlichen Verkehrskameras, Flugkontakten und berechneten Satellitenpositionen. USGS und GDACS werden alle fünf Minuten geprüft. Zusätzliche Ebenen lädst du im Globus.",
+        "data": {}
+      }
+    },
+    "abort": {
+      "already_configured": "Weltlage ist bereits eingerichtet."
+    }
   },
   "options": {
-    "step": {"init": {"title": "Weltlage konfigurieren", "description": "Nachrichten werden alle 5 bis 60 Minuten abgerufen. USGS und GDACS werden alle 5 Minuten geprüft. Änderungen laden die Integration neu.", "data": {"feeds": "Nachrichtenquellen", "interval": "Nachrichten-Abrufintervall (Minuten)"}}},
-    "error": {"select_feeds": "Wähle mindestens eine gültige Nachrichtenquelle."}
+    "step": {
+      "init": {
+        "title": "Weltlage konfigurieren",
+        "description": "Globus mit öffentlichen Verkehrskameras, Flugkontakten und berechneten Satellitenpositionen. USGS und GDACS werden alle fünf Minuten geprüft. Zusätzliche Ebenen lädst du im Globus.",
+        "data": {}
+      }
+    }
   }
 }

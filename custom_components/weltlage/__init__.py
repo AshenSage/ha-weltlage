@@ -16,8 +16,8 @@ async def async_setup(hass, config):
         coordinator = next((getattr(entry, "runtime_data", None) for entry in entries if getattr(entry, "runtime_data", None)), None)
         if coordinator is None:
             raise HomeAssistantError("Weltlage ist noch nicht eingerichtet")
-        await coordinator.async_fetch_intel(call.data["kind"], call.data.get("latitude", 45), call.data.get("longitude", 15))
-    hass.services.async_register(DOMAIN, "fetch_intel", fetch_intel, schema=vol.Schema({vol.Required("kind"): vol.In(["flights", "satellites"]), vol.Optional("latitude", default=45): vol.All(vol.Coerce(float), vol.Range(min=-90, max=90)), vol.Optional("longitude", default=15): vol.All(vol.Coerce(float), vol.Range(min=-180, max=180))}))
+        await coordinator.async_fetch_intel(call.data["kind"], call.data.get("latitude", 45), call.data.get("longitude", 15), call.data.get("provider", "london"))
+    hass.services.async_register(DOMAIN, "fetch_intel", fetch_intel, schema=vol.Schema({vol.Optional("provider", default="london"): vol.In(["london", "finland", "bc"]), vol.Required("kind"): vol.In(["flights", "satellites", "cameras"]), vol.Optional("latitude", default=45): vol.All(vol.Coerce(float), vol.Range(min=-90, max=90)), vol.Optional("longitude", default=15): vol.All(vol.Coerce(float), vol.Range(min=-180, max=180))}))
     return True
 
 

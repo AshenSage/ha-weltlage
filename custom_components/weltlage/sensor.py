@@ -28,9 +28,9 @@ class WeltlageSensor(CoordinatorEntity, SensorEntity):
         data = self.coordinator.data or {}
         if self.role == "quellenstatus":
             return data.get("status", "unavailable")
-        if not any(s.get("kind") == "news" and s.get("last_success") for s in data.get("sources", [])):
+        if not any(s.get("last_success") for s in data.get("sources", [])):
             return None
-        return data.get("news_24h", 0)
+        return len(data.get("hazards", []))
 
     @property
     def extra_state_attributes(self):

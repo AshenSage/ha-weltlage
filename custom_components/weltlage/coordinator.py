@@ -14,6 +14,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from .const import DOMAIN, VERSION, FEEDS, DEFAULT_FEEDS, HAZARD_SOURCES, MAX_BYTES, RETENTION_HOURS
 from .parsers import parse_news, merge_news, parse_gdacs, parse_usgs, iso
 from .intel import SATELLITE_URL, flight_url, parse_flights, parse_satellites
+from .cameras import CAMERA_PROVIDERS, parse_cameras, nearest_cameras
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -30,17 +31,14 @@ class WeltlageCoordinator(DataUpdateCoordinator):
         self._semaphore = asyncio.Semaphore(3)
         self._last_manual = 0
         self._force = False
-        selected = entry.options.get("feeds", entry.data.get("feeds", DEFAULT_FEEDS))
-        news_interval = max(300, min(3600, int(entry.options.get("interval", entry.data.get("interval", 15))) * 60))
-        self.sources = {key: {**FEEDS[key], "kind": "news", "interval": news_interval} for key in selected if key in FEEDS}
-        self.sources.update(HAZARD_SOURCES)
+        self.sources = {key: dict(value) for key, value in HAZARD_SOURCES.items()}
 
     async def async_load(self):
         saved = await self.store.async_load()
         if saved and isinstance(saved.get("cache"), dict):
             self.cache = {k: v for k, v in saved["cache"].items() if k in self.sources and isinstance(v, dict)}
         if saved and isinstance(saved.get("intel"), dict):
-            self.intel = {k: v for k, v in saved["intel"].items() if k in ("flights", "satellites") and isinstance(v, dict)}
+            self.intel = {k: v for k, v in saved["intel"].items() if k in ("flights", "satellites", "cameras") and isinstance(v, dict)}
 
     async def async_manual_refresh(self):
         # The refresh button cannot turn a shared free API into a rapid poll loop.
@@ -53,7 +51,9 @@ class WeltlageCoordinator(DataUpdateCoordinator):
     async def async_save(self):
         await self.store.async_save({"cache": self.cache, "intel": self.intel})
 
-    async def async_fetch_intel(self, kind, latitude=45, longitude=15):
+    async def async_fetch_intel(self, kind, latitude=45, longitude=15, provider="london"):
+        if kind == "cameras":
+            return await self.async_fetch_cameras(provider, latitude, longitude)
         if kind not in ("flights", "satellites"):
             raise ValueError("Unbekannte Ebene")
         url, lat, lon = flight_url(latitude, longitude) if kind == "flights" else (SATELLITE_URL, None, None)
@@ -79,6 +79,42 @@ class WeltlageCoordinator(DataUpdateCoordinator):
             except (aiohttp.ClientError, TimeoutError, ValueError, KeyError, TypeError) as err:
                 state["error"] = "Zeitüberschreitung" if isinstance(err, TimeoutError) else "Intel-Quelle nicht erreichbar" if isinstance(err, aiohttp.ClientError) else "Intel-Daten konnten nicht verarbeitet werden"
             self.intel[kind] = state
+            if self.data is not None:
+                self.async_set_updated_data({**self.data, "intel": dict(self.intel)})
+            await self.async_save()
+
+    async def async_fetch_cameras(self, provider, latitude, longitude):
+        if provider not in CAMERA_PROVIDERS:
+            raise ValueError("Unbekannte Kameraquelle")
+        # Validate coordinates using the same bounded globe-centre validator.
+        _, lat, lon = flight_url(latitude, longitude)
+        async with self._intel_lock:
+            now = time.time()
+            providers = dict(self.intel.get("cameras", {}).get("providers", {}))
+            old = providers.get(provider, {})
+            cooldown = 60 if old.get("error") else 3600
+            if now - old.get("last_attempt", 0) < cooldown:
+                return
+            state = {**old, "last_attempt": now}
+            try:
+                headers = {"User-Agent": f"HomeAssistant-Weltlage/{VERSION}", "Digitraffic-User": f"ha-weltlage/{VERSION}", "Accept": "application/json", "Accept-Encoding": "gzip"}
+                async with self.session.get(CAMERA_PROVIDERS[provider]["url"], headers=headers, timeout=aiohttp.ClientTimeout(total=25), allow_redirects=False) as response:
+                    response.raise_for_status()
+                    if response.status != 200:
+                        raise ValueError("Kamerakatalog nicht verfügbar")
+                    chunks, size = [], 0
+                    async for chunk in response.content.iter_chunked(65536):
+                        size += len(chunk)
+                        if size > MAX_BYTES:
+                            raise ValueError("Kamerakatalog zu gross")
+                        chunks.append(chunk)
+                all_items = await self.hass.async_add_executor_job(parse_cameras, b"".join(chunks), provider, now)
+                items = nearest_cameras(all_items, lat, lon, 600)
+                state.update(items=items, total=len(all_items), last_success=now, error=None)
+            except (aiohttp.ClientError, TimeoutError, ValueError, KeyError, TypeError) as err:
+                state["error"] = "Zeitüberschreitung" if isinstance(err, TimeoutError) else "Kameraquelle nicht erreichbar" if isinstance(err, aiohttp.ClientError) else "Kameradaten konnten nicht verarbeitet werden"
+            providers[provider] = state
+            self.intel["cameras"] = {"providers": providers}
             if self.data is not None:
                 self.async_set_updated_data({**self.data, "intel": dict(self.intel)})
             await self.async_save()

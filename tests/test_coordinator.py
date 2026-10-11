@@ -159,3 +159,25 @@ class CoordinatorTests(IsolatedAsyncioTestCase):
         self.assertIsNotNone(self.coordinator.intel["satellites"]["error"])
         with self.assertRaises(ValueError):
             await self.coordinator.async_fetch_intel("unknown")
+
+    async def test_default_sources_drop_news_even_with_legacy_options(self):
+        coordinator=c.WeltlageCoordinator(self.hass,self.entry)
+        self.assertEqual(set(coordinator.sources),{'usgs','gdacs'})
+        self.assertTrue(all(s['kind']!='news' for s in coordinator.sources.values()))
+
+    async def test_camera_catalogs_are_opt_in_cached_independently_and_survive_failure(self):
+        self.coordinator.data={}
+        row={'id':'one','lat':51.5,'lon':0,'commonName':'Road','additionalProperties':[{'key':'available','value':'true'},{'key':'imageUrl','value':'https://s3-eu-west-1.amazonaws.com/jamcams.tfl.gov.uk/00001.02151.jpg'}]}
+        self.responses['good']=(200,json.dumps([row]).encode())
+        provider={**c.CAMERA_PROVIDERS['london'],'url':self.coordinator.sources['good']['url']}
+        with patch.dict(c.CAMERA_PROVIDERS,{'london':provider}):
+            for now in (10000,10060,13599):
+                with patch.object(c.time,'time',return_value=now):await self.coordinator.async_fetch_intel('cameras',51,0,'london')
+            self.assertEqual(len(self.requests),1)
+            state=self.coordinator.intel['cameras']['providers']['london'];self.assertEqual(len(state['items']),1)
+            self.assertEqual(self.requests[0][1]['Digitraffic-User'],'ha-weltlage/1.2.0')
+            self.responses['good']=(503,b'down')
+            with patch.object(c.time,'time',return_value=13600):await self.coordinator.async_fetch_intel('cameras',51,0,'london')
+            state=self.coordinator.intel['cameras']['providers']['london'];self.assertEqual(state['last_success'],10000);self.assertEqual(len(state['items']),1);self.assertIsNotNone(state['error'])
+            self.coordinator.intel={};await self.coordinator.async_load();self.assertEqual(self.coordinator.intel['cameras']['providers']['london']['last_success'],10000)
+            with self.assertRaises(ValueError):await self.coordinator.async_fetch_intel('cameras',51,0,'evil')

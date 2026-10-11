@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { safeLink, escapeHTML, age, effectiveSourceStatus, regionMatches, filterArticles, capAlerts } from '../custom_components/weltlage/frontend/weltlage-card.js';
+import { safeLink, escapeHTML, age, effectiveSourceStatus, capAlerts } from '../custom_components/weltlage/frontend/weltlage-card.js';
 
 const now = Date.parse('2025-01-01T12:00:00Z');
 const config = { alert_count_entity: 'sensor.count', alert_updated_entity: 'sensor.updated', alert_areas: ['RS010'], alert_label: 'Šumadija', alert_max_age: 90 };
@@ -19,25 +19,10 @@ test('freshness is recomputed as time passes without HA updates', () => {
   assert.equal(effectiveSourceStatus({ ...source, status: 'error' }, now), 'error');
   assert.equal(effectiveSourceStatus({ last_success: null }, now), 'unavailable');
 });
-test('region, topic and time filters compose', () => {
-  const a = { published: now / 1000 - 3600, regions: ['world', 'ch', 'europa'], category: 'energie' };
-  assert.equal(regionMatches(a.regions, 'chrs'), true);
-  assert.equal(regionMatches(a.regions, 'rs'), false);
-  assert.equal(filterArticles([a], 'chrs', 'energie', 24, now).length, 1);
-  assert.equal(filterArticles([a], 'world', 'natur', 24, now).length, 0);
-  assert.equal(filterArticles([{ ...a, published: now / 1000 - 90000 }], 'world', 'all', 24, now).length, 0);
-  assert.equal(filterArticles([{ ...a, published: null, first_seen: now / 1000 - 3600 }], 'world', 'all', 24, now).length, 1);
-});
 test('missing publication date is displayed honestly', () => {
   assert.equal(age(null, now), 'Datum fehlt');
   assert.equal(age(now / 1000 - 600, now), 'vor 10 Min.');
   assert.equal(age(now / 1000 + 600, now), 'Zeitangabe prüfen');
-});
-test('multiple topics, language, publisher and all search words compose', () => {
-  const a = { published: now / 1000 - 600, title: 'Напади на нафту', summary: 'Oil refinery attack', language: 'sr', category: 'konflikte', topics: ['konflikte', 'energie'], sources: [{name:'RTS'}, {name:'BBC'}] };
-  assert.equal(filterArticles([a], 'world', 'energie', 24, now, {language:'sr', source:'RTS', query:'НАПАДИ refinery'}).length, 1);
-  for (const options of [{language:'de'}, {source:'SRF'}, {query:'refinery economy'}]) assert.equal(filterArticles([a], 'world', 'all', 24, now, options).length, 0);
-  assert.equal(filterArticles([a], 'world', 'all', 24, now, {source:'BBC', query:' bBc  oil '}).length, 1);
 });
 test('green CAP records do not become alarms despite raw counter', () => {
   const states = base();

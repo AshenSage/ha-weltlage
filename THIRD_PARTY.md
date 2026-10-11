@@ -7,7 +7,14 @@ Der eigene Weltlage-Code steht unter MIT. Die folgenden Bibliotheken und Daten b
 - Laufzeit-Bahndaten: CelesTrak, Dr. T.S. Kelso; OMM/SGP4 berechnete Positionen. Keine Bahndaten im Repository ausser ausdrücklich synthetischen Test-/Vorschaudaten.
 - USGS / GDACS: Quellen bleiben bei den Ereignissen sichtbar.
 
-Der lokale Globus enthält keine extern geladenen Skripte oder Bildkacheln.
+Alle Skripte und Bibliotheken werden lokal von HA geliefert. Optional geladene Kamera-Standbilder und Esri-Hintergrundkacheln kommen direkt vom jeweiligen öffentlichen Anbieter.
+
+- Natural Earth Land und Ländergrenzen 1:50m, Public Domain: [Land](https://github.com/nvkelso/natural-earth-vector/blob/master/geojson/ne_50m_land.geojson), [Grenzen](https://github.com/nvkelso/natural-earth-vector/blob/master/geojson/ne_50m_admin_0_boundary_lines_land.geojson). Attribute entfernt, Koordinaten gerundet, Linien mit Ramer-Douglas-Peucker (0.025°) vereinfacht. Grenzen sind Orientierungsdaten; kein politischer Anspruch.
+- TfL JamCams: [Open Data und Bedingungen](https://tfl.gov.uk/info-for/open-data-users/our-open-data). Attribution: “Powered by TfL Open Data. Contains OS data © Crown copyright and database rights”. Bilder werden weder beschnitten noch umgefärbt.
+- Fintraffic / Digitraffic: [CC BY 4.0 und Bedingungen](https://www.digitraffic.fi/en/terms-of-service/), [API](https://www.digitraffic.fi/en/road-traffic/). Attribution: “Fintraffic / digitraffic.fi · CC BY 4.0”. Katalogabrufe senden Digitraffic-User und Accept-Encoding: gzip.
+- DriveBC: [Open Government Licence – British Columbia](https://www2.gov.bc.ca/gov/content/data/open-data/open-government-licence-bc). Attribution: “DriveBC. Contains information licensed under the Open Government Licence – British Columbia”. Vorhandene Partner-Credits bleiben erhalten.
+- Esri World Imagery: [Dienst](https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer), [Nutzungsbedingungen](https://www.esri.com/en-us/legal/terms/web-site-service). Aktuelle Attribution wird aus der Dienstbeschreibung gelesen und auf der sichtbaren Karte angezeigt; Rückfalltext entsprechend der beim Aufbau geprüften Dienstbeschreibung: “Esri, Vantor, Earthstar Geographics, and the GIS User Community”. Die Kacheln werden nur für den aktuellen Ausschnitt geladen und vorübergehend im Arbeitsspeicher des Browsers gehalten. Kein Offlinepaket und keine Bildkacheln im Repository.
+- Der öffentliche TfL-Beispielkatalog in der Vorschau behält seine Attribution. Die veröffentlichten Test-Screenshots verwenden ausdrücklich synthetische DEMO-Kamerabilder.
 
 ## d3-geo
 

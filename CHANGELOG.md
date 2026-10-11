@@ -1,5 +1,16 @@
 # Änderungen
 
+## 1.2.0 · God's Eye: nur Globus
+
+- Nachrichten, Kennzahlenkarten und World-Monitor-Iframe aus der Karte entfernt. Auch mit bestehenden YAML-Karten startet die reine Globusansicht; alte Nachrichtenoptionen werden ignoriert. Nachrichtenquellen laufen nicht weiter im Hintergrund.
+- Grosser mobiler Globus mit echter Vollbildansicht, Schubladensteuerung, grünem und cyanfarbenem Stil; Bildansicht und Details liegen direkt über dem Globus.
+- Öffentliche TfL-, Fintraffic- und DriveBC-Kataloge auf Abruf, geprüfte Bildadressen, Kamera-Cluster und originale Standbilder mit Attribution. Nur die sichtbare Auswahl lädt Bilder; Ausfälle behalten den letzten Bildstand.
+- Esri-World-Imagery als wählbarer Satellitenhintergrund: nur sichtbare Kacheln, dynamische Attribution, begrenzte Parallelität und Speicher, keine Livebild- oder 3D-Gebäude-Behauptung.
+- Suche, Ausschnittfilter und Sortierung für Globusobjekte; geladene Flugregion wird sichtbar. Optionaler 60-Sekunden-Modus nur bei sichtbarer Karte; tatsächlich beobachtete Flugspuren und ISS-Folgemodus.
+- Lokale Speicherung von Blickrichtung, Zoom, Ebenen und Darstellung. Verfeinerte Küsten und Landesgrenzen im regionalen Zoom.
+- Lagebild-Sensor zählt Naturereignisse statt Nachrichten. IDs und automatisches Ressourcenupdate bleiben kompatibel.
+
+
 ## 1.1.2 · 11.10.2026
 
 - Kartenressource wird beim HA-Start automatisch angelegt oder auf Version und Dateiprüfsumme aktualisiert; keine manuellen Versionsparameter bei Updates.

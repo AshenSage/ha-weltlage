@@ -1,6 +1,6 @@
 fetch_intel:
   name: Globus-Daten laden
-  description: Öffentliche Flugkontakte im gewählten Ausschnitt oder Satelliten-Bahndaten laden. Flüge maximal einmal pro Minute, Bahndaten einmal pro zwei Stunden.
+  description: Öffentliche Flugkontakte im gewählten Ausschnitt, Satelliten-Bahndaten oder offizielle Kamerakataloge laden. Flüge maximal einmal pro Minute, Bahndaten einmal pro zwei Stunden.
   fields:
     kind:
       required: true
@@ -9,6 +9,7 @@ fetch_intel:
           options:
             - flights
             - satellites
+            - cameras
     latitude:
       selector:
         number:
@@ -21,3 +22,11 @@ fetch_intel:
           min: -180
           max: 180
           mode: box
+    provider:
+      description: Kameranetz (nur bei kind cameras). Katalog maximal einmal pro Stunde, nach Fehlern erneut nach einer Minute.
+      selector:
+        select:
+          options:
+            - london
+            - finland
+            - bc
