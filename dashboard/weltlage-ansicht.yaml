@@ -1,0 +1,14 @@
+# Diese Ansicht dem bestehenden Dashboard hinzufügen.
+title: Weltlage
+path: weltlage
+icon: mdi:earth
+type: panel
+cards:
+  - type: custom:weltlage-card
+    title: Weltlage
+    max_items: 3
+    alert_count_entity: sensor.cap_alerts_wmo_alert_count
+    alert_updated_entity: sensor.cap_alerts_wmo_last_updated
+    alert_areas:
+      - RS010
+    alert_label: Serbien · Šumadija

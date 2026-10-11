@@ -1,0 +1,12 @@
+{
+  "title": "Weltlage",
+  "config": {
+    "step": {"user": {"title": "Set up Weltlage", "description": "Selected news feeds, USGS earthquakes and GDACS natural events. No API keys required. The card reads regional warnings from your existing CAP Alerts integration.", "data": {"feeds": "News sources", "interval": "News refresh interval (minutes)"}}},
+    "error": {"select_feeds": "Select at least one valid news source."},
+    "abort": {"already_configured": "Weltlage is already configured."}
+  },
+  "options": {
+    "step": {"init": {"title": "Configure Weltlage", "description": "News refreshes every 5–60 minutes. USGS and GDACS are checked every 5 minutes. Changes reload the integration.", "data": {"feeds": "News sources", "interval": "News refresh interval (minutes)"}}},
+    "error": {"select_feeds": "Select at least one valid news source."}
+  }
+}
