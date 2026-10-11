@@ -42,7 +42,7 @@ const assert = require('node:assert/strict');
  click('[data-action="more-news"]');
  verify(()=>assert.equal(root.querySelectorAll('.news').length,6));
  verify(()=>assert.equal(root.querySelectorAll('.source-row').length,9));
- verify(()=>assert.ok(root.querySelector('.version-chip').textContent.includes('1.1.1')));
+ verify(()=>assert.ok(root.querySelector('.version-chip').textContent.includes('1.1.2')));
  verify(()=>assert.equal(root.querySelectorAll('.news .badge').length,0));
  select('.language-select','de');
  verify(()=>assert.equal(root.querySelectorAll('.news').length,3));

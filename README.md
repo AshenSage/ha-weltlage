@@ -1,8 +1,16 @@
-# Weltlage für Home Assistant · 1.1.1
+# Weltlage für Home Assistant · 1.1.2
 
 Ein eigener Bereich für Weltinformationen: dunkle, taktische Optik, zuerst fürs Handy gebaut. Die Übersicht kombiniert ausgewählte Nachrichten mit separaten Naturereignissen und deinen bestehenden CAP-Wetterwarnungen für **Serbien / Šumadija**. Direkt darin steht ein drehbarer Globus mit öffentlichen Signalen. Die externe World-Monitor-Karte öffnet sich zusätzlich bei Bedarf.
 
 ![Globus auf dem Handy – synthetische Vorschau](docs/globus-mobile.png)
+
+## Neu in 1.1.2: Automatische Kartenaktualisierung
+
+Nach einem HACS-Update **HA vollständig neu starten und Browser / Companion App neu laden**. Eine Ressourcen-URL oder Versionsnummer muss nicht mehr manuell angepasst werden.
+
+Beim Start registriert die Integration ihre Karte selbst. Vorhandene Weltlage-Einträge (auch `/local/weltlage/weltlage-card.js` und ältere Versionsparameter) werden automatisch auf die installierte Ausgabe umgestellt. Der interne Parameter enthält Version und Dateiprüfsumme; eine neue Ausgabe erhält automatisch eine neue Adresse für den Browsercache. Nur doppelte Weltlage-Einträge werden entfernt. Andere Karten und Dashboard-Inhalte bleiben erhalten.
+
+Die beiden JavaScript-Antworten tragen ausdrücklich `Cache-Control: no-store`. Ein älterer Query-Parameter wählt keine alte Datei aus. Bei YAML-Ressourcen wird nur die Laufzeitliste beim Start angepasst, keine YAML-Datei geschrieben. **Updates werden weiterhin über HACS installiert; bereits geöffnete Seiten benötigen danach ein Neuladen.**
 
 ## Neu in 1.1.1: Mobile Übersicht
 
@@ -24,7 +32,7 @@ Ein eigener Bereich für Weltinformationen: dunkle, taktische Optik, zuerst für
 
 Globus und Bibliotheken werden von deinem HA bereitgestellt; keine Laufzeit-CDNs, Schlüssel oder externe Globus-Bildkacheln. Die Zusatzdaten werden ausschliesslich über die Ladebuttons geholt. Canvas-Zeichnen pausiert ausserhalb des sichtbaren Bereichs oder in einem ausgeblendeten Browserfenster. Vorhandene RSS- und Naturereignis-Abrufe laufen wie bisher.
 
-**Update auf 1.1.1:** HACS → Weltlage → ⋮ → **Erneut herunterladen**, gegebenenfalls **main** auswählen. Danach HA vollständig neu starten. Die bestehende Ressource auf **`/weltlage/weltlage-card.js?v=1.1.1`** setzen und Browser / Companion App neu laden. Der Globus erscheint in bestehenden Weltlage-Karten automatisch. Mit `show_globe: false` lässt er sich ausblenden; dies steht auch im grafischen Editor. Oben muss «Karte 1.1.1» erscheinen.
+**Update auf 1.1.2:** HACS → Weltlage → ⋮ → **Erneut herunterladen**, gegebenenfalls **main** auswählen. Danach HA vollständig neu starten und Browser / Companion App neu laden. Die Ressource wird automatisch aktualisiert; oben muss «Karte 1.1.2» stehen. Der Globus erscheint automatisch, sofern `show_globe` nicht auf `false` steht.
 
 **Home Assistant 2026.10.0 oder neuer** · Installation und Updates über HACS · keine neuen API-Schlüssel. Die Integration enthält die Dashboardkarte samt Globus und stellt beide selbst bereit. Die Veröffentlichung ersetzt keinen Live-Test in Home Assistant; Grenzen stehen in `TESTBERICHT.md`.
 
@@ -35,17 +43,17 @@ Globus und Bibliotheken werden von deinem HA bereitgestellt; keine Laufzeit-CDNs
 1. In **HACS → ⋮ → Benutzerdefinierte Repositories** `https://github.com/AshenSage/ha-weltlage` hinzufügen; Typ **Integration**.
 2. **Weltlage** suchen und herunterladen. Falls noch kein Release existiert, die Standardbranch **main** herunterladen.
 3. **Home Assistant vollständig neu starten.** Unter **Einstellungen → Geräte & Dienste → Integration hinzufügen** nach **Weltlage** suchen. Quellen wählen; Nachrichtenabruf standardmässig alle 15 Minuten, USGS/GDACS alle 5 Minuten.
-4. Unter **Einstellungen → Dashboards → ⋮ → Ressourcen** einmal hinzufügen: URL **`/weltlage/weltlage-card.js`**, Typ **JavaScript-Modul**. Falls Ressourcen nicht sichtbar sind, im Benutzerprofil den erweiterten Modus aktivieren. Danach Browser bzw. Companion App neu laden.
+4. Browser bzw. Companion App neu laden. Die Integration hat das Kartenmodul bereits automatisch registriert; kein manueller Ressourceneintrag nötig.
 5. Im bestehenden Dashboard eine neue Ansicht **Weltlage** mit Layout **Panel (eine Karte)** anlegen. Eine **Manuelle Karte** hinzufügen und den untenstehenden Code einsetzen. Die eigenen bisherigen Ansichten bleiben bestehen.
 6. Unter **Quellen & Datenalter** die Abrufe kontrollieren. CAP darf bei fehlenden oder veralteten Daten keine Entwarnung anzeigen.
 
-HACS verwaltet den gesamten Ordner `custom_components/weltlage`, einschliesslich der Karte. Ein separates Kopieren nach `www` ist nicht erforderlich. Neue Versionen über HACS herunterladen, HA vollständig neu starten und Browser/Companion App neu laden. Die Ressourcen-URL bleibt gleich. Die Integration registriert keine fremden Ressourcen und schreibt nicht in bestehende Dashboard-Konfigurationen.
+HACS verwaltet den gesamten Ordner `custom_components/weltlage`, einschliesslich der Karte. Ein separates Kopieren nach `www` ist nicht erforderlich. Neue Versionen über HACS herunterladen, HA vollständig neu starten und Browser/Companion App neu laden. Die Integration verwaltet ausschliesslich ihren eigenen Modulressourceneintrag einschliesslich Versionsparameter. Dashboard-Konfigurationen werden nicht geschrieben.
 
 ### Manuelle Installation oder Wechsel vom ZIP 1.0.0
 
 Manuell den enthaltenen Ordner `custom_components/weltlage` nach **`/config/custom_components/weltlage`** kopieren und HA neu starten. Danach Schritte 3–6 oben ausführen. Keine `configuration.yaml` ersetzen.
 
-Bei einer vorhandenen manuellen Installation über HACS herunterladen bzw. erneut herunterladen. HACS übernimmt denselben Integrationsordner. Der bestehende Integrationseintrag und die Karte bleiben verwendbar. Eine alte Ressourcen-URL **`/local/weltlage/weltlage-card.js?v=1.0.0`** durch **`/weltlage/weltlage-card.js`** ersetzen; beide URLs nicht parallel laden. Die bisherige Kopie in `/config/www/weltlage` wird danach nicht mehr gebraucht.
+Bei einer vorhandenen manuellen Installation über HACS herunterladen bzw. erneut herunterladen. HACS übernimmt denselben Integrationsordner. Der bestehende Integrationseintrag und die Karte bleiben verwendbar. Eine alte Ressourcen-URL **`/local/weltlage/weltlage-card.js?v=1.0.0`** wird beim Start automatisch migriert. Die bisherige Kopie in `/config/www/weltlage` wird danach nicht mehr gebraucht.
 
 ```yaml
 type: custom:weltlage-card
@@ -132,8 +140,8 @@ CAP-Sensoren mit HA-Zustand `unknown` sind nutzbar, wenn ihre CAP-Attribute gül
 ## Betrieb und Fehlerbehebung
 
 - Integration nicht gefunden: Ordnerpfad kontrollieren; `manifest.json` muss direkt unter `/config/custom_components/weltlage/` liegen. HA nach dem Kopieren neu starten.
-- «Custom element doesn't exist»: Modulressource kontrollieren, Browser/Companion App neu laden. Bei Updates den Versionsparameter der Ressource erhöhen.
-- Globus fehlt / alte Ansicht: Oben «Karte 1.1.1» kontrollieren. Fehlt diese Anzeige, wird noch älterer Kartencode geladen. HACS erneut herunterladen, HA vollständig neu starten und genau eine Weltlage-Modulressource `/weltlage/weltlage-card.js?v=1.1.1` verwenden. Eine alte `/local/weltlage/…`-Ressource ersetzen. Danach die Companion App vollständig schliessen und öffnen. Steht die aktuelle Version da, im Karteneditor «3D-Globus anzeigen» aktivieren bzw. `show_globe: false` entfernen.
+- «Custom element doesn't exist»: HA vollständig neu starten, Browser/Companion App neu laden und HA-Protokoll auf Weltlage-Einrichtungsfehler prüfen. Die Ressource wird automatisch angelegt.
+- Globus fehlt / alte Ansicht: Oben «Karte 1.1.2» kontrollieren. HACS erneut herunterladen, HA vollständig neu starten und die Companion App vollständig schliessen und öffnen. Die Ressource wird dabei automatisch auf die aktuelle Version gesetzt. Steht die aktuelle Version da, im Karteneditor «3D-Globus anzeigen» aktivieren bzw. `show_globe: false` entfernen.
 - Einzelne Quelle ausgefallen: Quellenbereich öffnen. Andere Quellen laufen weiter; letzte erfolgreiche Daten bleiben sichtbar. DNS/Internet des HA-Systems und HA-Protokolle prüfen.
 - CAP «Daten prüfen»: Zähler, Letzter-Abruf-Entität und Gebietscode kontrollieren. Der rohe CAP-Zähler kann auch grüne Einträge zählen und ist daher keine Alarmzahl.
 - Weltkarte leer: World Monitor muss vom Handy aus erreichbar sein. Bei eigener Content Security Policy muss die Domain für Frames erlaubt sein.

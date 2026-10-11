@@ -1,6 +1,6 @@
-import './weltlage-globe.js?v=1.1.1';
-/* Weltlage 1.1.1 — mobile-first Home Assistant card with locally bundled globe libraries. */
-export const VERSION = '1.1.1';
+import './weltlage-globe.js?v=1.1.2';
+/* Weltlage 1.1.2 — mobile-first Home Assistant card with locally bundled globe libraries. */
+export const VERSION = '1.1.2';
 const REGIONS = { world: 'Welt', chrs: 'CH / RS', europa: 'Europa', balkan: 'Balkan', ch: 'Schweiz', rs: 'Serbien' };
 const TOPICS = { all: 'Alle Themen', politik: 'Politik & Diplomatie', konflikte: 'Konflikte', energie: 'Energie & Handel', wirtschaft: 'Wirtschaft', natur: 'Naturereignisse', technik: 'Technik' };
 const LANGUAGES = { de: 'Deutsch', en: 'Englisch', sr: 'Serbisch' };

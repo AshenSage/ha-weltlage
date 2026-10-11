@@ -78,7 +78,7 @@ const assert=require('node:assert/strict');
  await page.setViewportSize({width:390,height:844});
  const base=ROOT;const served=[];
  const fixture=readFileSync(base+'/scripts/preview-fixture.js','utf8');
- const template=readFileSync(base+'/VORSCHAU.html','utf8').replace(/<script type="module">[\s\S]*<\/script>/,'<script type="module">import * as WeltlagePreview from "/weltlage/weltlage-card.js?v=1.1.1";'+fixture+'</script>');
+ const template=readFileSync(base+'/VORSCHAU.html','utf8').replace(/<script type="module">[\s\S]*<\/script>/,'<script type="module">import * as WeltlagePreview from "/weltlage/weltlage-card.js?v=1.1.2";'+fixture+'</script>');
  const server=http.createServer((req,res)=>{const path=new URL(req.url,'http://localhost').pathname;if(path==='/'){res.setHeader('Content-Type','text/html');res.end(template);}else if(['/weltlage/weltlage-card.js','/weltlage/weltlage-globe.js'].includes(path)){served.push(path);res.setHeader('Content-Type','application/javascript');res.end(readFileSync(base+'/custom_components/weltlage/frontend/'+path.split('/').at(-1)));}else{res.statusCode=404;res.end();}});
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
  await page.goto('http://127.0.0.1:'+server.address().port+'/');await page.waitForFunction(()=>window.card?.shadowRoot?.querySelector('weltlage-globe')?.points?.length>0);

@@ -1,5 +1,12 @@
 # Änderungen
 
+## 1.1.2 · 11.10.2026
+
+- Kartenressource wird beim HA-Start automatisch angelegt oder auf Version und Dateiprüfsumme aktualisiert; keine manuellen Versionsparameter bei Updates.
+- Alte `/local/weltlage/weltlage-card.js`-Einträge werden migriert; doppelte eigene Einträge werden entfernt, andere Ressourcen bleiben erhalten. YAML-Ressourcen nur im Laufzeitspeicher angepasst.
+- Ausschliesslich zwei öffentliche JavaScript-Endpunkte mit ausdrücklichem `no-store`; alte Query-Parameter liefern die aktuell installierten Dateien.
+- Registrierung idempotent und nach einer teilweise fehlgeschlagenen Registrierung erneut ausführbar.
+
 ## 1.1.1 · 11.10.2026
 
 - Kompakte Handy-Meldungen: drei Titelzeilen in der Vorschau, vollständiger Titel beim Öffnen; dauernd wiederholter Medienbericht-Badge entfällt.
