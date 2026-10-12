@@ -102,3 +102,8 @@ HA Core 2026.10.1 mit Python 3.14.8 wurde isoliert installiert. Wegen eingeschr�
 Bestätigt: Komponentensetup, echter User-Configflow ohne Fehler, ConfigEntry `LOADED` mit fünf Schlüsseln, Optionsflow ohne Fehler, Reload eines Eintrags ohne gespeicherte Schlüssel aus der privaten Konfigurationsdatei, Karten-HTTP 200 mit `no-store`, Cesium-CSS HTTP 200 sowie erfolgreiche HA-WebSocket-Authentifizierung und `weltlage/config` mit fünf konfigurierten Feldern. Abschliessender Unload separat geprüft. Die vollständige HACS-Migration von einer echten bestehenden 1.2.0-Installation und reale Smartphone-Performance bleiben offen.
 
 Die alten Matrixzeilen «Schlüssel fehlt» sind damit für diese fünf Quellen überholt. Windy-Abdeckung und regional gerendertes Google-3D sind weiterhin Freigabeblocker; keine stabile Version wurde deshalb veröffentlicht. Ein privates dev.2-Paket enthält die fünf Werte in einer separaten Konfigurationsdatei, ausserhalb des Integrationsordners. Öffentliche ZIPs enthalten keine persönlichen Werte.
+
+
+## HACS-Beta-Veröffentlichung
+
+Auf ausdrücklichen Auftrag wird der geprüfte Stand als **2.0.0-beta.1**, GitHub `prerelease: true`, mit öffentlichem, schlüsselfreiem HACS-ZIP veröffentlicht. Die offenen Nachweise werden nicht als bestanden behandelt; sie verhindern weiterhin eine stabile 2.0.0-Freigabe. Der Beta-Paketbau wiederholt Build, 63 Python-, 5 JS- und 20 Browserprüfungen vor der Veröffentlichung. Ein Draft-Release erhält zuerst das vollständige ZIP und wird erst danach sichtbar. Schlüssel werden ausschliesslich in HA eingegeben.

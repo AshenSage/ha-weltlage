@@ -1,6 +1,6 @@
 # Weltlage · Cesium für Home Assistant
 
-**2.0.0-dev.2 ist ein Entwurf, keine freigegebene HACS-Version.** Der Rework ersetzt den Canvas-Globus durch lokal gebündeltes Cesium 1.146.0. Bestehende Karten behalten `custom:weltlage-card`, CAP-Entitäten und `alert_areas`; `max_items` und `show_globe` werden weiterhin akzeptiert.
+**2.0.0-beta.1 ist eine über HACS installierbare Vorabversion.** Der Rework ersetzt den Canvas-Globus durch lokal gebündeltes Cesium 1.146.0. Bestehende Karten behalten `custom:weltlage-card`, CAP-Entitäten und `alert_areas`; `max_items` und `show_globe` werden weiterhin akzeptiert.
 
 Beim Öffnen erscheint die ganze Erde mit Atmosphäre und Aranđelovac im Bildzentrum. Die Kameradistanz richtet sich nach dem verfügbaren Bildbereich. Home stellt diese Ansicht wieder her. Schnellziele führen nach Aranđelovac, Balkan, Europa und Schweiz. Koordinaten: 44.30694 N, 20.56 E ([verifizierte Ortskoordinaten](https://www.geodatos.net/en/coordinates/serbia/arandelovac)). Die letzte Kameraposition wird bewusst nicht wiederhergestellt.
 
@@ -16,7 +16,7 @@ Kartenstil, Layer, Satellitenkategorie, Effekte und Favoriten werden gerätebezo
 2. Einstellungen → Geräte & Dienste → Weltlage → Konfigurieren. Die sechs optionalen Schlüssel lokal eingeben.
 3. Dashboard neu laden. Bei einem alten Browsercache einmal vollständig neu laden. Die Lovelace-Ressource bekommt automatisch die installierte Version plus Build-Hash; keine manuelle Versionsnummer nötig.
 
-Der Entwurfsbranch soll noch **nicht** als reguläres HACS-Update installiert werden. Das vollständige Review-Paket entsteht in GitHub Actions. Eine Freigabe veröffentlicht `weltlage.zip`, das alle Cesium-Worker, Widgets, Bilder und JavaScript-Dateien enthält. Ein zusätzlicher Node-Dienst ist nicht notwendig.
+Die Beta wird als GitHub-Vorabrelease mit `weltlage.zip` bereitgestellt. In HACS → Weltlage → ⋮ → Erneut herunterladen die Version `v2.0.0-beta.1` auswählen; bei Bedarf «Andere Version» bzw. Vorabversionen aktivieren. Das ZIP enthält alle Cesium-Worker, Widgets, Bilder und JavaScript-Dateien. Ein zusätzlicher Node-Dienst ist nicht notwendig. Zugangsdaten werden nach dem Neustart lokal unter Geräte & Dienste → Weltlage → Konfigurieren eingegeben; die Veröffentlichung enthält keine persönlichen Schlüssel.
 
 ```yaml
 type: custom:weltlage-card
