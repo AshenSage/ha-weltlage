@@ -1,6 +1,6 @@
 # Cesium-Rework: Prüfbericht / Fortsetzung
 
-Stand: 12.10.2026. Ausgangsbasis `7ec0a4f` (1.2.0), Original God's Eye View `591f299`. **Aktueller Veröffentlichungskanal: normales Release 2.0.0 auf ausdrücklichen Auftrag.** Die folgenden früheren Prüfabschnitte dokumentieren den Rework; der aktuelle Veröffentlichungsstand steht am Ende. Offene Live-/Gerätenachweise bleiben offen.
+Stand: 12.10.2026. Ausgangsbasis `7ec0a4f` (1.2.0), Original God's Eye View `591f299`. **Aktueller Veröffentlichungskanal: normales Release 2.0.1.** Die folgenden früheren Prüfabschnitte dokumentieren den Rework; der aktuelle Veröffentlichungsstand steht am Ende. Offene Live-/Gerätenachweise bleiben offen.
 
 ## Reproduzierbare Prüfungen
 
@@ -115,3 +115,14 @@ Der Nutzer verlangt ab jetzt ausschliesslich normale Releases. Daher verwenden M
 Der gemeldete Downloadfehler entstand durch `releases/download/7571422/weltlage.zip`: HACS hatte mangels normalem Release die Main-Commit-Version gewählt. Das Paket lag ausschliesslich am Beta-Tag. Das normale Release stellt nun den passenden Versions-Tag samt ZIP bereit.
 
 Die vom Nutzer zitierte Konfigurationsbeschreibung stimmt exakt mit der Übersetzung aus 1.2.0 überein. Der neue Config-/Optionsflow enthält sechs Passwortfelder und das Abruflimit; er wurde zuvor im isolierten HA Core 2026.10.1 geprüft. Das Update erfordert einen vollständigen HA-Neustart. Es enthält keine privaten Zugangsdaten. Die Wahl des normalen Release-Kanals ersetzt keine noch ausstehenden regionalen Live-/Geräteprüfungen.
+
+
+## Karten-/Token-Korrektur 2.0.1
+
+Die Screenshot-Meldung stammt aus `Ion.getDefaultTokenCredit`. Im tatsächlich gebündelten Cesium 1.146.0 rufen `CesiumTerrainProvider.fromIonAssetId` und `Cesium3DTileset.fromIonAssetId` intern `IonResource.fromAssetId(assetId)` ohne Weitergabe der Darstellungsoptionen auf. Der bisher dort übergebene `accessToken` hatte somit keine Wirkung. Beide Pfade erstellen nun zuerst eine explizit authentifizierte `IonResource` und verwenden anschliessend `fromUrl`. Der Demo-Token wird deaktiviert.
+
+«Karte» lädt Esri World Street Map mit Attribution aus der Dienstbeschreibung. Der öffentliche Metadatenabruf war HTTP 200 (24 Zoomstufen), und echte Strassenkartenkacheln wurden im Chromium-Globus dargestellt. Das vom Nutzer gemeldete HTTP 403 wurde ohne Netzwerkprotokoll nicht einer konkreten Anfrage zugeordnet. Die bisherige OSM-Quelle verlangt einen gültigen Referrer; die neue Basis hängt nicht mehr von deren Kacheln ab. Esri World Street Map bleibt ein Legacy-Rasterdienst (keine laufenden Updates, Einstellung Dezember 2029 laut Anbieter), keine Zusage aktueller Strassenzustände.
+
+Lokal bestanden: fünf JavaScript-, 63 Python- und **26 Browserprüfungen**. Die sechs zusätzlichen Browserprüfungen bestätigen keine ion-Anfrage ohne Schlüssel, echte Strassenkartenkacheln ohne OSM-Anfrage, Erhalt der vorherigen Basis bei synthetischem Metadatenausfall, explizite Token-Übergabe für Terrain und Google-3D sowie keine Demo-Token-Creditmeldung. Die ion-Anfragen werden ausschliesslich mit einem synthetischen Testtoken abgefangen und mit HTTP 403 beantwortet; das prüft Authentifizierung und kontrollierte Fehlerbehandlung, keine reale Assetabdeckung. Vorherige Live-Nachweise bleiben unverändert. Das Release enthält keine persönlichen Schlüssel.
+
+Im ersten GitHub-PR-Lauf wartete die ältere Kameraprüfung pauschal 400 ms und traf noch den Ladezustand. Sie wartet jetzt begrenzt auf den tatsächlichen `missing_key`-Status; die Prüfung des sichtbaren Texts bleibt bestehen. Der synthetische ion-403-Antwortadapter liefert die CORS-Freigabe, damit der Browser den HTTP-Fehler regulär verarbeitet.

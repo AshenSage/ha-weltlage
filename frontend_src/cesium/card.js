@@ -7,6 +7,8 @@ import {flyToWorldTarget} from '../vendor/worldFocus.js';
 export const VERSION=__WELTLAGE_VERSION__;
 const BASE='/weltlage/cesium/1.146.0/';
 C.buildModuleUrl.setBaseUrl(BASE);
+// Every ion resource is authenticated explicitly; never use the SDK's demo token.
+C.Ion.defaultAccessToken='';
 const GROUPS=['Bewegung','Kameras','Wetter','Ereignisse','Infrastruktur'];
 const MAPS={map:'Karte',satellite:'Satellit',hybrid:'Hybrid',topo:'Gelände',photo:'Fotorealistisch 3D'};
 const SATS={stations:'ISS / Stationen',visual:'Helle Satelliten','gps-ops':'GPS',galileo:'Galileo',glonass:'GLONASS',geo:'Geostationär',starlink:'Starlink · bis 1000'};
@@ -83,11 +85,11 @@ export class WeltlageCard extends HTMLElement{
  async _base(){
   if(!this._viewer)return;const v=this._viewer,request=++this._baseRequest,style=this._map;let ps=[];
   try{
-   if(style==='map')ps=[new C.OpenStreetMapImageryProvider({url:'https://tile.openstreetmap.org/',maximumLevel:18,credit:'© OpenStreetMap contributors · ODbL'})];else if(style==='topo')ps=[new C.UrlTemplateImageryProvider({url:'https://a.tile.opentopomap.org/{z}/{x}/{y}.png',maximumLevel:15,credit:'© OpenStreetMap contributors, SRTM · OpenTopoMap (CC BY-SA)'})];else ps=[await C.ArcGisMapServerImageryProvider.fromUrl('https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer',{enablePickFeatures:false})];
+   if(style==='map')ps=[await C.ArcGisMapServerImageryProvider.fromUrl('https://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer',{enablePickFeatures:false})];else if(style==='topo')ps=[new C.UrlTemplateImageryProvider({url:'https://a.tile.opentopomap.org/{z}/{x}/{y}.png',maximumLevel:15,credit:'© OpenStreetMap contributors, SRTM · OpenTopoMap (CC BY-SA)'})];else ps=[await C.ArcGisMapServerImageryProvider.fromUrl('https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer',{enablePickFeatures:false})];
    if(style==='hybrid')ps.push(new C.UrlTemplateImageryProvider({url:'https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',credit:'Esri · Grenzen und Ortsnamen',maximumLevel:18}));
    if(style==='photo'){
     if(!this._api.cesium_ion_token)throw Error('missing-ion');
-    if(!this._photo){const tile=await C.Cesium3DTileset.fromIonAssetId(2275207,{accessToken:this._api.cesium_ion_token,maximumScreenSpaceError:24,cacheBytes:64*1024*1024,maximumCacheOverflowBytes:16*1024*1024});if(v!==this._viewer){tile.destroy();return}this._photo=v.scene.primitives.add(tile)}
+    if(!this._photo){const resource=await C.IonResource.fromAssetId(2275207,{accessToken:this._api.cesium_ion_token}),tile=await C.Cesium3DTileset.fromUrl(resource,{maximumScreenSpaceError:24,cacheBytes:64*1024*1024,maximumCacheOverflowBytes:16*1024*1024});if(v!==this._viewer||request!==this._baseRequest){tile.destroy();return}this._photo=v.scene.primitives.add(tile)}
    }
    if(v!==this._viewer||request!==this._baseRequest)return;if(this._photo)this._photo.show=style==='photo';
    for(const old of this._baseLayers||[])v.imageryLayers.remove(old,true);this._baseLayers=ps.map((p,i)=>v.imageryLayers.addImageryProvider(p,i));
@@ -95,7 +97,7 @@ export class WeltlageCard extends HTMLElement{
    this._mapNote(style==='photo'?'Google 3D · örtlich begrenzte Abdeckung':'');v.scene.requestRender();
   }catch{if(v!==this._viewer||request!==this._baseRequest)return;if(this._photo)this._photo.show=false;this._mapNote(style==='photo'?'Fotorealistisch 3D nicht verfügbar. ion-Assetzugang prüfen; Satellitenbasis bleibt.':'Kartenbasis nicht erreichbar; Globus bleibt bedienbar.');if(ps.length&&style==='photo'){for(const old of this._baseLayers||[])v.imageryLayers.remove(old,true);this._baseLayers=ps.map(p=>v.imageryLayers.addImageryProvider(p))}}
  }
- async _terrain(){const v=this._viewer;if(!v)return;const request=++this._terrainRequest;if(!this._terrainOn){v.terrainProvider=new C.EllipsoidTerrainProvider();return}const token=this._api.cesium_ion_token;if(!token){this._mapNote('3D-Höhenmodell: Cesium-ion-Token in der Integration hinterlegen.');return}try{const p=this._terrainProvider||await C.CesiumTerrainProvider.fromIonAssetId(1,{accessToken:token,requestVertexNormals:true});if(v===this._viewer&&request===this._terrainRequest&&this._terrainOn){this._terrainProvider=p;v.terrainProvider=p;v.scene.requestRender()}}catch{if(v===this._viewer)this._mapNote('World Terrain nicht verfügbar: ion-Asset 1 prüfen. Globus verwendet Ellipsoid.')}}
+ async _terrain(){const v=this._viewer;if(!v)return;const request=++this._terrainRequest;if(!this._terrainOn){v.terrainProvider=new C.EllipsoidTerrainProvider();return}const token=this._api.cesium_ion_token;if(!token){this._mapNote('3D-Höhenmodell: Cesium-ion-Token in der Integration hinterlegen.');return}try{let p=this._terrainProvider;if(!p){const resource=await C.IonResource.fromAssetId(1,{accessToken:token});p=await C.CesiumTerrainProvider.fromUrl(resource,{requestVertexNormals:true})}if(v===this._viewer&&request===this._terrainRequest&&this._terrainOn){this._terrainProvider=p;v.terrainProvider=p;v.scene.requestRender()}}catch{if(v===this._viewer)this._mapNote('World Terrain nicht verfügbar: ion-Asset 1 prüfen. Globus verwendet Ellipsoid.')}}
  _mapNote(text){this.$('.map-note').textContent=text}
  _bounds(){const v=this._viewer;if(!v)return [16,40,24,47];const p=C.Cartographic.fromCartesian(v.camera.positionWC);if(p.height>12000000)return [-25,34,45,72];const r=v.camera.computeViewRectangle(v.scene.globe.ellipsoid);return regionalBounds(r?[r.west,r.south,r.east,r.north].map(C.Math.toDegrees):null,{latitude:C.Math.toDegrees(p.latitude),longitude:C.Math.toDegrees(p.longitude)})}
  _running(){return this.isConnected&&this._viewer&&this._visible&&!document.hidden}
