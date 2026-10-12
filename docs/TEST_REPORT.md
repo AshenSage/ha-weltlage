@@ -1,6 +1,6 @@
 # Cesium-Rework: Prüfbericht / Fortsetzung
 
-Stand: 12.10.2026. Ausgangsbasis `7ec0a4f` (1.2.0), Original God's Eye View `591f299`. **Aktueller Veröffentlichungskanal: normales Release 2.0.0 auf ausdrücklichen Auftrag.** Die folgenden früheren Prüfabschnitte dokumentieren den Rework; der aktuelle Veröffentlichungsstand steht am Ende. Offene Live-/Gerätenachweise bleiben offen.
+Stand: 12.10.2026. Ausgangsbasis `7ec0a4f` (1.2.0), Original God's Eye View `591f299`. **Aktueller Veröffentlichungskanal: normales Release 2.0.1.** Die folgenden früheren Prüfabschnitte dokumentieren den Rework; der aktuelle Veröffentlichungsstand steht am Ende. Offene Live-/Gerätenachweise bleiben offen.
 
 ## Reproduzierbare Prüfungen
 
@@ -124,3 +124,5 @@ Die Screenshot-Meldung stammt aus `Ion.getDefaultTokenCredit`. Im tatsächlich g
 «Karte» lädt Esri World Street Map mit Attribution aus der Dienstbeschreibung. Der öffentliche Metadatenabruf war HTTP 200 (24 Zoomstufen), und echte Strassenkartenkacheln wurden im Chromium-Globus dargestellt. Das vom Nutzer gemeldete HTTP 403 wurde ohne Netzwerkprotokoll nicht einer konkreten Anfrage zugeordnet. Die bisherige OSM-Quelle verlangt einen gültigen Referrer; die neue Basis hängt nicht mehr von deren Kacheln ab. Esri World Street Map bleibt ein Legacy-Rasterdienst (keine laufenden Updates, Einstellung Dezember 2029 laut Anbieter), keine Zusage aktueller Strassenzustände.
 
 Lokal bestanden: fünf JavaScript-, 63 Python- und **26 Browserprüfungen**. Die sechs zusätzlichen Browserprüfungen bestätigen keine ion-Anfrage ohne Schlüssel, echte Strassenkartenkacheln ohne OSM-Anfrage, Erhalt der vorherigen Basis bei synthetischem Metadatenausfall, explizite Token-Übergabe für Terrain und Google-3D sowie keine Demo-Token-Creditmeldung. Die ion-Anfragen werden ausschliesslich mit einem synthetischen Testtoken abgefangen und mit HTTP 403 beantwortet; das prüft Authentifizierung und kontrollierte Fehlerbehandlung, keine reale Assetabdeckung. Vorherige Live-Nachweise bleiben unverändert. Das Release enthält keine persönlichen Schlüssel.
+
+Im ersten GitHub-PR-Lauf wartete die ältere Kameraprüfung pauschal 400 ms und traf noch den Ladezustand. Sie wartet jetzt begrenzt auf den tatsächlichen `missing_key`-Status; die Prüfung des sichtbaren Texts bleibt bestehen. Der synthetische ion-403-Antwortadapter liefert die CORS-Freigabe, damit der Browser den HTTP-Fehler regulär verarbeitet.
