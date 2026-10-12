@@ -12,6 +12,8 @@ await cp('node_modules/cesium/LICENSE.md',resolve(out,'cesium/LICENSE.md'));
 await cp('frontend_src/vendor/GODS-EYE-LICENSE',resolve(out,'GODS-EYE-LICENSE.txt'));
 await cp('THIRD_PARTY.md',resolve(out,'THIRD_PARTY.md'));
 await cp('LICENSE',resolve(out,'LICENSE.txt'));
+await mkdir(resolve(out,'licenses'),{recursive:true});
+for(const [source,name] of [['node_modules/@mapbox/vector-tile/LICENSE.txt','vector-tile.txt'],['node_modules/pbf/LICENSE','pbf.txt'],['node_modules/@mapbox/point-geometry/LICENSE','point-geometry.txt']])await cp(source,resolve(out,'licenses',name));
 await writeFile(resolve(out,'build.json'),JSON.stringify({version:pkg.version,cesium:pkg.devDependencies.cesium},null,2)+'\n');
 await rm(resolve(out,'weltlage-globe.js'),{force:true});
 console.log('Built card, satellite worker and local Cesium runtime assets');

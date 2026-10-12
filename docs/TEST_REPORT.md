@@ -1,6 +1,6 @@
 # Cesium-Rework: Prüfbericht / Fortsetzung
 
-Stand: 12.10.2026. Ausgangsbasis `7ec0a4f` (1.2.0), Original God's Eye View `591f299`. **Aktueller Veröffentlichungskanal: normales Release 2.0.1.** Die folgenden früheren Prüfabschnitte dokumentieren den Rework; der aktuelle Veröffentlichungsstand steht am Ende. Offene Live-/Gerätenachweise bleiben offen.
+Stand: 12.10.2026. Ausgangsbasis `7ec0a4f` (1.2.0), Original God's Eye View `591f299`. **Aktueller Veröffentlichungskanal: normales Release 2.1.0.** Die folgenden früheren Prüfabschnitte dokumentieren den Rework; der aktuelle Veröffentlichungsstand steht am Ende. Offene Live-/Gerätenachweise bleiben offen.
 
 ## Reproduzierbare Prüfungen
 
@@ -126,3 +126,16 @@ Die Screenshot-Meldung stammt aus `Ion.getDefaultTokenCredit`. Im tatsächlich g
 Lokal bestanden: fünf JavaScript-, 63 Python- und **26 Browserprüfungen**. Die sechs zusätzlichen Browserprüfungen bestätigen keine ion-Anfrage ohne Schlüssel, echte Strassenkartenkacheln ohne OSM-Anfrage, Erhalt der vorherigen Basis bei synthetischem Metadatenausfall, explizite Token-Übergabe für Terrain und Google-3D sowie keine Demo-Token-Creditmeldung. Die ion-Anfragen werden ausschliesslich mit einem synthetischen Testtoken abgefangen und mit HTTP 403 beantwortet; das prüft Authentifizierung und kontrollierte Fehlerbehandlung, keine reale Assetabdeckung. Vorherige Live-Nachweise bleiben unverändert. Das Release enthält keine persönlichen Schlüssel.
 
 Im ersten GitHub-PR-Lauf wartete die ältere Kameraprüfung pauschal 400 ms und traf noch den Ladezustand. Sie wartet jetzt begrenzt auf den tatsächlichen `missing_key`-Status; die Prüfung des sichtbaren Texts bleibt bestehen. Der synthetische ion-403-Antwortadapter liefert die CORS-Freigabe, damit der Browser den HTTP-Fehler regulär verarbeitet.
+
+
+## Schärfe und Objektgrafik 2.1.0
+
+Der Screenshot zeigte die Folge von `useBrowserRecommendedResolution: true` plus `resolutionScale = 1.5 / devicePixelRatio`: Die ohnehin auf CSS-Pixel reduzierte Szene wurde auf dem Smartphone nochmals heruntergerechnet. Die Szene verwendet nun echte Pixeldichte bis 2×, MSAA-Kantenglättung und feinere Globusdetails.
+
+«Karte» verwendet reale OpenFreeMap-MVT-Daten, gezeichnet durch einen lokalen Canvas-Vektorrenderer. Ortsnamen sind separate Cesium-Labels mit Horizont-/Abstandsprüfung und Bildschirm-Kollisionstest; sie werden nicht aus einer Bildkachel vergrössert. Place-IDs verhindern Duplikate zwischen Zoomstufen. Maximal 600 Ortslabels bleiben erhalten, mit Vorrang für nahe Orte und Länder-/Kontinentnamen. Vektoranfragen sind auf vier aktive Bilder begrenzt; Rohdaten-LRU maximal 48 Kacheln / 12 MB. Entfernen bricht Abrufe ab und gibt Provider, Beschriftungen, Viewer und Worker frei. Parser-Lizenzen werden mitgeliefert.
+
+SVG-Billboards ersetzen sämtliche allgemeinen Punktmarker. Einzelflug-Auswahl und Tracking bleiben erhalten. Kamera-, Störungs- und weitere dichte Gruppen verwenden ebenfalls Symbole samt Anzahl und können näher angesehen werden. Das Verkehrs-Autosymbol steht für ein Strassensegment, nicht für ein individuell empfangenes Fahrzeug. Globus, Aranđelovac-Nahansicht und Objektgrafik werden bei simuliertem Geräte-DPR 3 geprüft; Karten stammen real vom Anbieter, Objekte sind eindeutig synthetische Testfixtures. Neue Screenshots werden als GitHub-Actions-Prüfartefakt hochgeladen.
+
+Lokal bestanden: 5 JavaScript-, 63 Python- und **32 Browserprüfungen**. Die Browserprüfung bestätigt 2× Renderbuffer bei Geräte-DPR 3, reale Vektorkacheln, Aranđelovac-Nahansicht, fünf unterscheidbare Objektsymbole, SVG-Flugobjekt-Auswahl/Tracking, Gruppensymbol mit Anzahl, tatsächliches Antippen und Hineinzoomen der Gruppe sowie Freigabe des Vektorproviders. Die Gruppen-Billboards bekommen eigene Entity-IDs für die Auswahl. Geometrie und native Ortsbeschriftung wurden visuell geprüft. Der Veröffentlichungsvorgang wiederholt die Prüfungen.
+
+Die Flugobjekt-Prüfung wartet auf ein tatsächlich vom Viewer pickbares SVG-Billboard und klickt dessen projizierte Position. Ein erster PR-Lauf klickte bereits unmittelbar nach Entity-Erzeugung, bevor das asynchron geladene SVG gezeichnet war; diese zeitabhängige Annahme wurde entfernt.
