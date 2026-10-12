@@ -1,6 +1,6 @@
 # Cesium-Rework: Prüfbericht / Fortsetzung
 
-Stand: 12.10.2026. Branch `rework/cesium-2`; Ausgangsbasis `7ec0a4f` (1.2.0), Original God's Eye View `591f299`. **Entwurf: kein stabiles 2.0.0-Release veröffentlicht.**
+Stand: 12.10.2026. Ausgangsbasis `7ec0a4f` (1.2.0), Original God's Eye View `591f299`. **Aktueller Veröffentlichungskanal: normales Release 2.0.0 auf ausdrücklichen Auftrag.** Die folgenden früheren Prüfabschnitte dokumentieren den Rework; der aktuelle Veröffentlichungsstand steht am Ende. Offene Live-/Gerätenachweise bleiben offen.
 
 ## Reproduzierbare Prüfungen
 
@@ -107,3 +107,11 @@ Die alten Matrixzeilen «Schlüssel fehlt» sind damit für diese fünf Quellen 
 ## HACS-Beta-Veröffentlichung
 
 Auf ausdrücklichen Auftrag wird der geprüfte Stand als **2.0.0-beta.1**, GitHub `prerelease: true`, mit öffentlichem, schlüsselfreiem HACS-ZIP veröffentlicht. Die offenen Nachweise werden nicht als bestanden behandelt; sie verhindern weiterhin eine stabile 2.0.0-Freigabe. Der Beta-Paketbau wiederholt Build, 63 Python-, 5 JS- und 20 Browserprüfungen vor der Veröffentlichung. Ein Draft-Release erhält zuerst das vollständige ZIP und wird erst danach sichtbar. Schlüssel werden ausschliesslich in HA eingegeben.
+
+## Normale Veröffentlichungen ab 2.0.0
+
+Der Nutzer verlangt ab jetzt ausschliesslich normale Releases. Daher verwenden Manifest, Package, Lockdatei und Integrationskonstante `2.0.0`; der Workflow akzeptiert nur numerische `x.y.z`-Versionen und veröffentlicht mit `prerelease: false` und «Latest». Das vollständige ZIP wird vor der Veröffentlichung angehängt. HACS benötigt somit keinen Vorabversionsschalter.
+
+Der gemeldete Downloadfehler entstand durch `releases/download/7571422/weltlage.zip`: HACS hatte mangels normalem Release die Main-Commit-Version gewählt. Das Paket lag ausschliesslich am Beta-Tag. Das normale Release stellt nun den passenden Versions-Tag samt ZIP bereit.
+
+Die vom Nutzer zitierte Konfigurationsbeschreibung stimmt exakt mit der Übersetzung aus 1.2.0 überein. Der neue Config-/Optionsflow enthält sechs Passwortfelder und das Abruflimit; er wurde zuvor im isolierten HA Core 2026.10.1 geprüft. Das Update erfordert einen vollständigen HA-Neustart. Es enthält keine privaten Zugangsdaten. Die Wahl des normalen Release-Kanals ersetzt keine noch ausstehenden regionalen Live-/Geräteprüfungen.
