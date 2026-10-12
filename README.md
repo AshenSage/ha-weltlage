@@ -1,12 +1,12 @@
 # Weltlage · Cesium für Home Assistant
 
-**2.0.0 ist das normale HACS-Release.** Der Rework ersetzt den Canvas-Globus durch lokal gebündeltes Cesium 1.146.0. Bestehende Karten behalten `custom:weltlage-card`, CAP-Entitäten und `alert_areas`; `max_items` und `show_globe` werden weiterhin akzeptiert. Künftige Veröffentlichungen verwenden normale Versionsnummern ohne Beta-Kanal.
+**2.0.1 ist das normale HACS-Release.** Der Rework ersetzt den Canvas-Globus durch lokal gebündeltes Cesium 1.146.0. Bestehende Karten behalten `custom:weltlage-card`, CAP-Entitäten und `alert_areas`; `max_items` und `show_globe` werden weiterhin akzeptiert. Künftige Veröffentlichungen verwenden normale Versionsnummern ohne Beta-Kanal.
 
 Beim Öffnen erscheint die ganze Erde mit Atmosphäre und Aranđelovac im Bildzentrum. Die Kameradistanz richtet sich nach dem verfügbaren Bildbereich. Home stellt diese Ansicht wieder her. Schnellziele führen nach Aranđelovac, Balkan, Europa und Schweiz. Koordinaten: 44.30694 N, 20.56 E ([verifizierte Ortskoordinaten](https://www.geodatos.net/en/coordinates/serbia/arandelovac)). Die letzte Kameraposition wird bewusst nicht wiederhergestellt.
 
 ## Oberfläche
 
-Globus, kompakte Werkzeugleiste und Layer darunter, ohne Nachrichten- oder Kennzahlenkarten. Ein Finger dreht, zwei Finger zoomen. Details, Verfolgung und Kamerafavoriten erscheinen unten. Kartenbasis: Karte, Satellit, Hybrid, Topografie und Google Photorealistic 3D Tiles via ion. Das echte Höhenmodell ist separat schaltbar. Welt Terrain ist Asset 1; Google 3D ist Asset 2275207. Es gibt keine zweite Gebäudeschicht und deshalb keine überlagerten OSM-Gebäude.
+Globus, kompakte Werkzeugleiste und Layer darunter, ohne Nachrichten- oder Kennzahlenkarten. Ein Finger dreht, zwei Finger zoomen. Details, Verfolgung und Kamerafavoriten erscheinen unten. Kartenbasis: Karte (Esri World Street Map), Satellit, Hybrid, Topografie und Google Photorealistic 3D Tiles via ion. Das echte Höhenmodell ist separat schaltbar. Welt Terrain ist Asset 1; Google 3D ist Asset 2275207. Es gibt keine zweite Gebäudeschicht und deshalb keine überlagerten OSM-Gebäude.
 
 Kartenstil, Layer, Satellitenkategorie, Effekte und Favoriten werden gerätebezogen im Browser gespeichert. Nachtsicht, FLIR und CRT sind ausdrücklich **visuelle Effekte**, keine Wärmebild- oder Erkennungsdaten. Suche umfasst geladene Objekte, Schnellziele und Eingaben `Breite,Länge`; eine weltweite Ortssuche ist noch nicht implementiert.
 
@@ -16,7 +16,7 @@ Kartenstil, Layer, Satellitenkategorie, Effekte und Favoriten werden gerätebezo
 2. Einstellungen → Geräte & Dienste → Weltlage → Konfigurieren. Die sechs optionalen Schlüssel lokal eingeben.
 3. Dashboard neu laden. Bei einem alten Browsercache einmal vollständig neu laden. Die Lovelace-Ressource bekommt automatisch die installierte Version plus Build-Hash; keine manuelle Versionsnummer nötig.
 
-Das normale GitHub-Release `v2.0.0` enthält `weltlage.zip`. In HACS → Weltlage → ⋮ → Erneut herunterladen die Version `v2.0.0` auswählen. Ein Beta-Schalter ist nicht erforderlich. Falls noch eine kurze Commit-Version wie `7571422` angeboten wird, zuerst die Repository-Informationen in HACS aktualisieren. Das ZIP enthält alle Cesium-Worker, Widgets, Bilder und JavaScript-Dateien. Ein zusätzlicher Node-Dienst ist nicht notwendig. Zugangsdaten werden nach dem Neustart lokal unter Geräte & Dienste → Weltlage → Konfigurieren eingegeben; die Veröffentlichung enthält keine persönlichen Schlüssel.
+Das normale GitHub-Release `v2.0.1` enthält `weltlage.zip`. In HACS → Weltlage → ⋮ → Erneut herunterladen die Version `v2.0.1` auswählen. Ein Beta-Schalter ist nicht erforderlich. Falls noch eine kurze Commit-Version wie `7571422` angeboten wird, zuerst die Repository-Informationen in HACS aktualisieren. Das ZIP enthält alle Cesium-Worker, Widgets, Bilder und JavaScript-Dateien. Ein zusätzlicher Node-Dienst ist nicht notwendig. Zugangsdaten werden nach dem Neustart lokal unter Geräte & Dienste → Weltlage → Konfigurieren eingegeben; die Veröffentlichung enthält keine persönlichen Schlüssel.
 
 Zeigt «Konfigurieren» noch ausschliesslich die Beschreibung «Globus mit öffentlichen Verkehrskameras … USGS und GDACS werden alle fünf Minuten geprüft», läuft noch der Dialog aus 1.2.0. Nach dem HACS-Update Home Assistant vollständig neu starten und die Seite neu laden. Der neue Dialog zeigt sechs Passwortfelder sowie das Abruflimit. Die bestehende Weltlage-Einrichtung kann erhalten bleiben.
 
