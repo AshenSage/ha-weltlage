@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   package:
-    if: github.event_name == 'release' || (github.event.ref_type == 'branch' && github.event.ref == 'release/v2.0.0-beta.1')
+    if: github.event_name == 'release' || (github.event.ref_type == 'branch' && startsWith(github.event.ref, 'release/v'))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -33,22 +33,22 @@ jobs:
           import os,json,re
           tag=os.environ['PUBLICATION_REF'].removeprefix('release/')
           version=json.load(open('custom_components/weltlage/manifest.json'))['version']
-          assert re.fullmatch(r'\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?',version)
+          assert re.fullmatch(r'\d+\.\d+\.\d+',version), 'Only normal release versions are supported'
           assert tag=='v'+version
           with open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write('tag='+tag+'\n')
           PY
       - run: npm run build && npm test && npm run test:python
       - run: npx playwright install --with-deps chromium
       - run: npm run test:browser && npm run package
-      - name: Publish complete beta package
+      - name: Publish complete normal release package
         if: github.event_name == 'create'
         env:
           GH_TOKEN: ${{ github.token }}
           PUBLICATION_TAG: ${{ steps.version.outputs.tag }}
           PUBLICATION_SHA: ${{ github.sha }}
         run: |
-          gh release create "$PUBLICATION_TAG" weltlage.zip --draft --prerelease --target "$PUBLICATION_SHA" --title "$PUBLICATION_TAG · Cesium-Globus" --notes-file docs/RELEASE_NOTES.md
-          gh release edit "$PUBLICATION_TAG" --draft=false --prerelease --latest=false
+          gh release create "$PUBLICATION_TAG" weltlage.zip --draft --target "$PUBLICATION_SHA" --title "$PUBLICATION_TAG · Cesium-Globus" --notes-file docs/RELEASE_NOTES.md
+          gh release edit "$PUBLICATION_TAG" --draft=false --prerelease=false --latest=true
       - name: Attach package to manually published release
         if: github.event_name == 'release'
         env:
