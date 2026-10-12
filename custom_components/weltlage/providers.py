@@ -123,6 +123,8 @@ class GlobeProviders:
             if not 0 <= now - selected.timestamp() <= 366 * 86400:
                 raise ValueError("Bilddatum ausserhalb des letzten Jahres")
         k = _key(layer, b, group, date)
+        if layer == "mapillary" and (k[3]-k[1])*(k[4]-k[2]) > spec["max_area"] + 1e-9:
+            return {**common, "status": "zoom_required", "message": "Mapillary: näher zoomen (maximal 0,01 Quadratgrad)"}
         old = self.cache.get(k)
         if old and now < old["next_due"]:
             self.cache.move_to_end(k)
@@ -198,7 +200,7 @@ class GlobeProviders:
             obj = await self.request("https://overpass-api.de/api/interpreter", method="POST", data={"data": body})
             return dict(items=await self.executor(parse.osm, obj, layer, now), static=True)
         if layer == "mapillary":
-            obj = await self.request("https://graph.mapillary.com/images", headers={"Authorization": "OAuth " + cred["mapillary_client_token"]}, params={"bbox": f"{w},{s},{e},{n}", "limit": 100, "fields": "id,geometry,captured_at,thumb_1024_url"}, source="mapillary")
+            obj = await self.request("https://graph.mapillary.com/images", headers={"Authorization": "OAuth " + cred["mapillary_client_token"]}, params={"bbox": f"{w:.6f},{s:.6f},{e:.6f},{n:.6f}", "limit": 20, "fields": "id,geometry,captured_at"}, source="mapillary")
             return dict(items=await self.executor(parse.mapillary, obj), limited=bool(obj.get("paging", {}).get("next")))
         if layer == "traffic":
             rows = []
@@ -273,25 +275,43 @@ class GlobeProviders:
             self.cache.popitem(last=False)
         return row
 
+    async def streetphoto(self, image_id):
+        if not str(image_id).isdigit() or len(str(image_id)) > 32:
+            raise ValueError("Bild-ID ungültig")
+        if not self.credentials.get("mapillary_client_token"):
+            raise SourceError("missing_key", "Mapillary-Token fehlt")
+        k = ("streetphoto", str(image_id))
+        if k in self.cache and time.time() < self.cache[k]["next_due"]:
+            return self.cache[k]["result"]
+        obj = await self.request(f"https://graph.mapillary.com/{image_id}", headers={"Authorization": "OAuth " + self.credentials["mapillary_client_token"]}, params={"fields": "id,geometry,captured_at,thumb_1024_url"}, source="mapillary")
+        row = dict(id=str(obj.get("id", image_id)), name="Mapillary · Strassenaufnahme", image_url=parse.link(obj.get("thumb_1024_url")), page_url=f"https://www.mapillary.com/app/?pKey={image_id}&focus=photo", observed=(number(obj.get("captured_at")) or 0)/1000 or None, loaded=time.time(), source="Mapillary")
+        self.cache[k] = dict(result=row, next_due=time.time()+120)
+        while len(self.cache) > MAX_CACHE:
+            self.cache.popitem(last=False)
+        return row
+
     async def _ships(self, b, now):
         w, s, e, n = b
         rows = {}
         self._charge("aisstream")
         async with self.semaphore:
             async with self.session.ws_connect("wss://stream.aisstream.io/v0/stream", timeout=aiohttp.ClientWSTimeout(ws_close=3), heartbeat=20, max_msg_size=100000) as ws:
-                await ws.send_json({"APIKey": self.credentials["aisstream_api_key"], "BoundingBoxes": [[[s,w],[n,e]]], "FilterMessageTypes": ["PositionReport"]})
+                await ws.send_json({"APIKey": self.credentials["aisstream_api_key"], "BoundingBoxes": [[[s,w],[n,e]]], "FilterMessageTypes": ["PositionReport", "StandardClassBPositionReport", "ExtendedClassBPositionReport"]})
                 deadline = time.monotonic()+8
                 while time.monotonic() < deadline and len(rows) < 400:
                     try:
                         msg = await ws.receive(timeout=max(.1, deadline-time.monotonic()))
                     except TimeoutError:
                         break
-                    if msg.type != aiohttp.WSMsgType.TEXT:
+                    if msg.type not in (aiohttp.WSMsgType.TEXT, aiohttp.WSMsgType.BINARY):
+                        if not rows:
+                            raise SourceError("unreachable", "AISStream-Verbindung vor Datenempfang geschlossen")
                         break
                     a = json.loads(msg.data)
                     if "error" in a or "Error" in a:
                         raise SourceError("invalid_key", "AISStream lehnt Zugang ab")
-                    meta, pos = a.get("MetaData", {}), a.get("Message", {}).get("PositionReport", {})
+                    meta, reports = a.get("MetaData", {}), a.get("Message", {})
+                    pos = reports.get("PositionReport") or reports.get("StandardClassBPositionReport") or reports.get("ExtendedClassBPositionReport") or {}
                     p = parse.position(pos.get("Latitude"), pos.get("Longitude"))
                     if p and s <= p[0] <= n and w <= p[1] <= e:
                         ident = str(meta.get("MMSI", pos.get("UserID", "")))

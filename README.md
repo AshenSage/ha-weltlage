@@ -1,6 +1,6 @@
 # Weltlage · Cesium für Home Assistant
 
-**2.0.0-dev.1 ist ein Entwurf, keine freigegebene HACS-Version.** Der Rework ersetzt den Canvas-Globus durch lokal gebündeltes Cesium 1.146.0. Bestehende Karten behalten `custom:weltlage-card`, CAP-Entitäten und `alert_areas`; `max_items` und `show_globe` werden weiterhin akzeptiert.
+**2.0.0-dev.2 ist ein Entwurf, keine freigegebene HACS-Version.** Der Rework ersetzt den Canvas-Globus durch lokal gebündeltes Cesium 1.146.0. Bestehende Karten behalten `custom:weltlage-card`, CAP-Entitäten und `alert_areas`; `max_items` und `show_globe` werden weiterhin akzeptiert.
 
 Beim Öffnen erscheint die ganze Erde mit Atmosphäre und Aranđelovac im Bildzentrum. Die Kameradistanz richtet sich nach dem verfügbaren Bildbereich. Home stellt diese Ansicht wieder her. Schnellziele führen nach Aranđelovac, Balkan, Europa und Schweiz. Koordinaten: 44.30694 N, 20.56 E ([verifizierte Ortskoordinaten](https://www.geodatos.net/en/coordinates/serbia/arandelovac)). Die letzte Kameraposition wird bewusst nicht wiederhergestellt.
 
@@ -35,6 +35,12 @@ alert_label: Serbien · Šumadija
 
 `default_layers` gilt bei einem frischen Browserprofil. Bereits gespeicherte Einstellungen haben Vorrang. `map_style` kann `map`, `satellite`, `hybrid`, `topo` oder `photo` sein.
 
+## Persönliche Schlüsseldatei
+
+Optional können die sechs Felder aus `/config/weltlage_credentials.json` gelesen werden. Die Datei liegt **ausserhalb** von `custom_components/weltlage` und bleibt bei HACS-Updates erhalten. Vorhandene Einstellungen in HA haben Vorrang; ausdrücklich leere Felder deaktivieren eine Quelle. Beim Optionsdialog werden lokale Werte vorgeschlagen. Die Datei enthält ausschliesslich Zugangsdaten, keine Client-Secrets, und wird nicht über HTTP ausgeliefert oder in öffentliche Release-ZIPs gepackt. Ungültige Dateien verursachen eine verständliche Einrichtungsfehlermeldung.
+
+Persönliche Werte werden nie im öffentlichen Repository hinterlegt. Wer eine eigene Datei verwendet, legt sie einmal in den HA-Konfigurationsordner und startet HA neu. Die veröffentlichten Pakete enthalten keine vorgegebenen Schlüssel.
+
 ## Schlüssel und Kontingente
 
 | Lokales Feld | Verwendung |
@@ -52,7 +58,9 @@ Keine bezahlten Upgrades werden vorgenommen. Kartenkacheln, ion-Assets und Bilde
 
 ## Daten und Grenzen
 
-[Prüfbericht und Quellenmatrix](docs/TEST_REPORT.md) enthält die Live-Nachweise und offenen Punkte. Hauptlayer sind ADS-B, Satelliten, Windy, Fintraffic, Radar, globales IR, Windmodell, TomTom, AISStream, EMSC, FIRMS, Mapillary, NASA-Tagesmosaik, OSM-Infrastruktur, Kabel, GDACS und CAP.
+[Prüfbericht und Quellenmatrix](docs/TEST_REPORT.md) enthält die Live-Nachweise und offenen Punkte. Mapillary liefert maximal 20 Positionspunkte je Anfrage; der Ausschnitt darf höchstens 0,01 Quadratgrad umfassen. Einzelbilder werden erst beim Öffnen über den Backend-Token abgefragt.
+
+Hauptlayer sind ADS-B, Satelliten, Windy, Fintraffic, Radar, globales IR, Windmodell, TomTom, AISStream, EMSC, FIRMS, Mapillary, NASA-Tagesmosaik, OSM-Infrastruktur, Kabel, GDACS und CAP.
 
 Globale Kameradistanz löst keine unbegrenzten regionalen Abrufe aus. Kleine Layer melden «Näher zoomen». Ohne Treffer wird nicht automatisch «keine Abdeckung» behauptet. Satellitenpositionen werden aus maximal 14 Tage alten Bahnelementen in einem Worker berechnet. Windpfeile zeigen Modellrichtung. Flugspuren verbinden tatsächlich empfangene Positionssnapshots; sie sind keine Rekonstruktion des vollständigen Flugwegs. Radar läuft durch beobachtete Frames, deren Zeitpunkt an der Schaltfläche steht. Rasterzeiten sind Quellen-/Framezeiten, keine Garantie, dass jeder Pixel zur gleichen Zeit aufgenommen wurde.
 
@@ -62,7 +70,7 @@ CAP verwendet verfügbare Warnpolygone. Ohne Geometrie ist nur eine ausdrücklic
 
 ## Architektur / Entwicklung
 
-Authentifizierte Home-Assistant-WebSocket-Kommandos `weltlage/config`, `weltlage/layer` und `weltlage/camera`. Validierte Layernamen, Grenzen, Filter und Datumsangaben; keine vom Client wählbaren Proxy-URLs. Gemeinsamer Backend-Cache, maximal drei parallele HTTP-Abrufe, begrenzte Antwortgrössen, Backoff und lokale Tageslimits. Grössere Kataloge gehen nicht in Recorder-Sensorattribute. Die bisherigen Sensor-/Button-IDs bleiben erhalten, die alten Hintergrundpolls werden gestoppt. Der Legacy-Service ist nur als begrenzter Aufruf erhalten.
+Authentifizierte Home-Assistant-WebSocket-Kommandos `weltlage/config`, `weltlage/layer` und `weltlage/camera` und `weltlage/streetphoto`. Validierte Layernamen, Grenzen, Filter und Datumsangaben; keine vom Client wählbaren Proxy-URLs. Gemeinsamer Backend-Cache, maximal drei parallele HTTP-Abrufe, begrenzte Antwortgrössen, Backoff und lokale Tageslimits. Grössere Kataloge gehen nicht in Recorder-Sensorattribute. Die bisherigen Sensor-/Button-IDs bleiben erhalten, die alten Hintergrundpolls werden gestoppt. Der Legacy-Service ist nur als begrenzter Aufruf erhalten.
 
 ```sh
 npm ci

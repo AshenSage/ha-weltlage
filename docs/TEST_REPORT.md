@@ -6,7 +6,7 @@ Stand: 12.10.2026. Branch `rework/cesium-2`; Ausgangsbasis `7ec0a4f` (1.2.0), Or
 
 - `npm run build`: Cesium-Karte, Satellite-Worker und lokale Runtime-Assets gebaut.
 - `npm test`: 5 Prüfungen bestanden (Globusrahmen, Ortskoordinaten, valide Positionen, begrenzte Spur und Unterbrechung bei Beobachtungslücken).
-- `npm run test:python`: 57 Prüfungen bestanden. Vorhandene Parser-/Coordinator-/Ressourcenprüfungen plus Cache-Sharing, Backoff, Datenalter, Schlüssel-/Extentzustände, Budget, Abbruch, XML-Sicherheit und neue Datenparser. Die HA-Schnittstellen sind dabei nachgebildet; das ist kein HA-Installationstest.
+- `npm run test:python`: 63 Prüfungen bestanden. Vorhandene Parser-/Coordinator-/Ressourcenprüfungen plus Cache-Sharing, Backoff, Datenalter, Schlüssel-/Extentzustände, Budget, Abbruch, XML-Sicherheit und neue Datenparser. Die HA-Schnittstellen sind dabei nachgebildet; das ist kein HA-Installationstest.
 - Chromium 141 / SwiftShader: 20 Browserprüfungen bestanden, keine `pageerror`-Ereignisse. Breiten 320, 360, 390, 430 und 844 px; Hoch-/Querformat; kein horizontaler Seitenüberlauf; globales Zentrum; Schnellziel und Home; tatsächlicher Klick auf ein ausdrücklich synthetisches Flug-Testobjekt, Tracking und Schliessen; Zwei-Finger-Zoom; Layer ohne Schlüssel; Vollbild-Dock; Entfernen, Viewer-/Worker-Freigabe und Wiederöffnung.
 - Globaler Zielpunkt nach Wiederöffnung: 44.30694025 N, 20.56000035 E. Der vollständige Globus passt mit Rand und Atmosphäre in den verfügbaren Bildbereich; geometrische Frustumprüfung plus Sichtprüfung.
 - `npm run package`: vollständig gebündeltes `weltlage.zip` erstellt; Versionsgleichheit von Manifest und Build sowie erforderliche Worker-/CSS-Dateien geprüft.
@@ -77,3 +77,28 @@ Cesium-Prüfoberfläche mit echten Esri-Kacheln; HA simuliert, kein ion-Token. B
 ![Mobile Hochformatansicht](screenshots/cesium-mobile.png)
 
 ![Mobile Querformatansicht](screenshots/cesium-landscape.png)
+
+
+## Nachprüfung mit privaten Schlüsseln (12.10.2026, dev.2)
+
+Die fünf neu gelieferten Zugangsdaten wurden ausschliesslich lokal verwendet. Weder Schlüssel noch signed Bild-/Asset-URLs stehen in diesem Bericht oder im Repository. Der früher genannte Windy-Schlüssel bleibt für Liveabrufe durch automatische Prüfung blockiert, bis seine Verwendung ausdrücklich freigegeben ist.
+
+| Quelle | Neuer echter Nachweis |
+|---|---|
+| Cesium World Terrain, Asset 1 | Endpoint HTTP 200, `layer.json` HTTP 200, echter Quantized-Mesh-Tile HTTP 200 / 93.283 Bytes |
+| Google Photorealistic 3D, Asset 2275207 | ion-Endpoint und tatsächlicher Google-Root-Tileset HTTP 200, Root mit vier Kindern. Regionale gerenderte Gebäudeabdeckung weiterhin nicht bestätigt |
+| OSM Buildings, Asset 96188 | Endpoint und Root-Tileset HTTP 200; dient nur als Zugriffsprüfung, keine zusätzliche überlagerte Gebäudeanzeige eingebaut |
+| TomTom | Vier echte Verkehrssegmente um Aranđelovac; 300 geparste Störungen im Schweizer Ausschnitt |
+| NASA FIRMS | Ein echter VIIRS-NOAA-20-Hotspot im Schweizer Ausschnitt; kein bestätigter Waldbrand |
+| Mapillary | Nach Begrenzung/gerundeten Koordinaten und lazy Einzelabruf jeweils 20 Positionspunkte bei Aranđelovac und Oberbipp, echte Einzelbilder HTTP 200. Beispieldaten stammen aus 2019 bzw. 2025, keine Live-Kameras |
+| AISStream | 50 bzw. beim Folgeabruf 60 echte Schiffspositionen im Rotterdam-Ausschnitt innerhalb von acht Sekunden |
+
+Gefundene und korrigierte Fehler: AISStream sendet hier JSON auch als WebSocket-Binärnachricht; nun werden Text/Binär und Class-A/Class-B-Positionsmeldungen verarbeitet. Mapillary begrenzt Ausschnitte auf 0,01 Quadratgrad und verweigerte grosse Abfragen. Der Adapter prüft die tatsächliche quantisierte Fläche vor dem Abruf, rundet Query-Koordinaten und lädt Bilder einzeln.
+
+### Native HA-Prüfung
+
+HA Core 2026.10.1 mit Python 3.14.8 wurde isoliert installiert. Wegen eingeschränkter Host-Interface-Erkennung im Testcontainer wurden ausschliesslich im Testharness der HTTP-Quell-IP-Resolver auf tatsächliches Loopback und DNS auf ThreadedResolver gesetzt. Keine solche Änderung ist Bestandteil der Integration oder des privaten Pakets. Das ist ein echter Core-/Integrationslauf mit umgebungsspezifischer Netzwerkanpassung, kein Test auf dem Raspberry Pi oder im Hausnetz.
+
+Bestätigt: Komponentensetup, echter User-Configflow ohne Fehler, ConfigEntry `LOADED` mit fünf Schlüsseln, Optionsflow ohne Fehler, Reload eines Eintrags ohne gespeicherte Schlüssel aus der privaten Konfigurationsdatei, Karten-HTTP 200 mit `no-store`, Cesium-CSS HTTP 200 sowie erfolgreiche HA-WebSocket-Authentifizierung und `weltlage/config` mit fünf konfigurierten Feldern. Abschliessender Unload separat geprüft. Die vollständige HACS-Migration von einer echten bestehenden 1.2.0-Installation und reale Smartphone-Performance bleiben offen.
+
+Die alten Matrixzeilen «Schlüssel fehlt» sind damit für diese fünf Quellen überholt. Windy-Abdeckung und regional gerendertes Google-3D sind weiterhin Freigabeblocker; keine stabile Version wurde deshalb veröffentlicht. Ein privates dev.2-Paket enthält die fünf Werte in einer separaten Konfigurationsdatei, ausserhalb des Integrationsordners. Öffentliche ZIPs enthalten keine persönlichen Werte.

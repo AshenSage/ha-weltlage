@@ -5,6 +5,7 @@ from homeassistant.core import callback
 from homeassistant.helpers import selector
 from .const import DOMAIN
 from .layers import KEYS
+from .credentials import async_local_credentials
 
 
 def schema(values):
@@ -33,7 +34,12 @@ class WeltlageConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 return self.async_create_entry(title="Weltlage", data=clean(user_input))
             except ValueError:
                 errors["base"] = "invalid_key"
-        return self.async_show_form(step_id="user", data_schema=schema(user_input or {}), errors=errors)
+        try:
+            local = await async_local_credentials(self.hass)
+        except ValueError:
+            local = {}
+            errors["base"] = "invalid_local_file"
+        return self.async_show_form(step_id="user", data_schema=schema(user_input or local), errors=errors)
 
     @staticmethod
     @callback
@@ -44,7 +50,12 @@ class WeltlageConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 class WeltlageOptionsFlow(config_entries.OptionsFlow):
     async def async_step_init(self, user_input=None):
         errors = {}
-        values = {**self.config_entry.data, **self.config_entry.options}
+        try:
+            local = await async_local_credentials(self.hass)
+        except ValueError:
+            local = {}
+            errors["base"] = "invalid_local_file"
+        values = {**local, **self.config_entry.data, **self.config_entry.options}
         if user_input is not None:
             try:
                 return self.async_create_entry(title="", data=clean(user_input))

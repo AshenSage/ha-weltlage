@@ -11,5 +11,5 @@ for f in ['weltlage-card.js','satellite-worker.js','cesium/Workers/createTaskPro
  if not (component/'frontend'/f).is_file():raise SystemExit('Missing generated asset: '+f)
 with ZipFile(root/'weltlage.zip','w',ZIP_DEFLATED) as z:
  for f in sorted(component.rglob('*')):
-  if f.is_file() and '__pycache__' not in f.parts and f.suffix not in ('.pyc','.pyo'):z.write(f,f.relative_to(component))
+  if f.is_file() and '__pycache__' not in f.parts and f.suffix not in ('.pyc','.pyo') and f.name not in ('weltlage_credentials.json','private_credentials.json'):z.write(f,f.relative_to(component))
 print('HACS asset: weltlage.zip')

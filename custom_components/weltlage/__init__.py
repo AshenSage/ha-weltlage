@@ -1,11 +1,12 @@
 """Weltlage custom integration."""
 from homeassistant.const import Platform
-from homeassistant.exceptions import HomeAssistantError
+from homeassistant.exceptions import HomeAssistantError, ConfigEntryError
 import voluptuous as vol
 from .coordinator import WeltlageCoordinator
 from .frontend import async_register_frontend
 from .const import DOMAIN
 from .layers import KEYS
+from .credentials import async_local_credentials
 from .providers import GlobeProviders
 from .websocket import register as register_websocket
 
@@ -35,7 +36,11 @@ async def async_setup_entry(hass, entry):
     # Retain sensor IDs, but stop old polls and catalogs in sensor attributes.
     coordinator.sources = {}
     coordinator.update_interval = None
-    values = {**entry.data, **entry.options}
+    try:
+        local = await async_local_credentials(hass)
+    except ValueError as err:
+        raise ConfigEntryError(str(err)) from None
+    values = {**local, **entry.data, **entry.options}
     coordinator.globe = GlobeProviders(coordinator.session, hass.async_add_executor_job, {k: values.get(k, "") for k in KEYS}, values.get("request_budget", 500))
     await coordinator.async_config_entry_first_refresh()
     entry.runtime_data = coordinator

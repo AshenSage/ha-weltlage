@@ -9,6 +9,9 @@ await build({entryPoints:['frontend_src/cesium/satellite-worker.js'],outfile:res
 await rm(resolve(out,'cesium'),{recursive:true,force:true});
 for(const name of ['Workers','Assets','ThirdParty','Widgets'])await cp(resolve(root,'node_modules/cesium/Build/Cesium',name),resolve(out,'cesium',name),{recursive:true});
 await cp('node_modules/cesium/LICENSE.md',resolve(out,'cesium/LICENSE.md'));
+await cp('frontend_src/vendor/GODS-EYE-LICENSE',resolve(out,'GODS-EYE-LICENSE.txt'));
+await cp('THIRD_PARTY.md',resolve(out,'THIRD_PARTY.md'));
+await cp('LICENSE',resolve(out,'LICENSE.txt'));
 await writeFile(resolve(out,'build.json'),JSON.stringify({version:pkg.version,cesium:pkg.devDependencies.cesium},null,2)+'\n');
 await rm(resolve(out,'weltlage-globe.js'),{force:true});
 console.log('Built card, satellite worker and local Cesium runtime assets');

@@ -12,3 +12,7 @@ tests/artifacts/
 
 # Frontend runtime is reproducibly bundled into the HACS release ZIP.
 custom_components/weltlage/frontend/
+
+# Personal keys never belong in source or public release packages.
+weltlage_credentials.json
+**/private_credentials.json

@@ -42,11 +42,19 @@ async def camera(hass, connection, msg):
     except (SourceError, ValueError) as err:
         connection.send_error(msg["id"], getattr(err,"status","invalid_parameters"), getattr(err,"message","Ungültige Kamera-ID"))
 
+@websocket_api.websocket_command({vol.Required("type"): "weltlage/streetphoto", vol.Required("image_id"): vol.All(str, vol.Match(r"^\d{1,32}$"))})
+@websocket_api.async_response
+async def streetphoto(hass, connection, msg):
+    try:
+        connection.send_result(msg["id"], await provider(hass).streetphoto(msg["image_id"]))
+    except (SourceError, ValueError) as err:
+        connection.send_error(msg["id"], getattr(err, "status", "invalid_parameters"), getattr(err, "message", "Ungültige Bild-ID"))
+
 @callback
 def register(hass):
     state = hass.data.setdefault(DOMAIN, {})
     if state.get("websocket_registered"):
         return
-    for handler in (config, layer, camera):
+    for handler in (config, layer, camera, streetphoto):
         websocket_api.async_register_command(hass, handler)
     state["websocket_registered"] = True

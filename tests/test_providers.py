@@ -53,6 +53,30 @@ class ProviderTests(IsolatedAsyncioTestCase):
   self.assertEqual((await self.p.layer('gdacs',[20,44,21,45]))['status'],'no_hits')
  async def test_global_ir_extent_is_not_mislabelled_as_empty_data(self):
   self.assertEqual((await self.p.layer('clouds',[0,65,10,70]))['status'],'no_coverage')
+ async def test_mapillary_large_area_requests_no_data(self):
+  self.p.credentials['mapillary_client_token']='TEST-FIXTURE'
+  self.assertEqual((await self.p.layer('mapillary',[20,44,20.2,44.2]))['status'],'zoom_required')
+ async def test_mapillary_photo_is_lazy_and_rejects_arbitrary_paths(self):
+  self.p.credentials['mapillary_client_token']='TEST-FIXTURE'
+  with self.assertRaises(ValueError):await self.p.streetphoto('../secret')
+  async def response(*a,**kw):return {'id':'123','captured_at':1000000,'thumb_1024_url':'https://example.test/photo.jpg'}
+  self.p.request=response
+  r=await self.p.streetphoto('123');self.assertEqual(r['observed'],1000);self.assertTrue(r['image_url'])
+ async def test_ais_binary_json_reports_are_real_contacts(self):
+  import aiohttp
+  from types import SimpleNamespace
+  self.p.credentials['aisstream_api_key']='TEST-FIXTURE'
+  class Socket:
+   count=0
+   async def __aenter__(self):return self
+   async def __aexit__(self,*a):return False
+   async def send_json(self,a):pass
+   async def receive(self,**kw):
+    self.count+=1
+    if self.count>1:raise TimeoutError
+    return SimpleNamespace(type=aiohttp.WSMsgType.BINARY,data=json.dumps({'MetaData':{'MMSI':123,'ShipName':'FIXTURE'},'Message':{'StandardClassBPositionReport':{'Latitude':51.9,'Longitude':4.2,'Sog':5}}}).encode())
+  self.p.session=SimpleNamespace(ws_connect=lambda *a,**kw:Socket())
+  r=await self.p.layer('ships',[3.8,51.6,4.6,52.1]);self.assertEqual(r['status'],'current');self.assertEqual(r['items'][0]['name'],'FIXTURE')
  async def test_close_cancels_pending_work(self):
   async def fetch(*a):await asyncio.Event().wait()
   self.p._fetch=fetch;task=asyncio.create_task(self.p.layer('earthquakes',[20,44,21,45]));await asyncio.sleep(.01);await self.p.close()

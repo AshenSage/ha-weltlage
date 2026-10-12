@@ -28,4 +28,6 @@ LAYERS = {
     "cap": product("CAP · Šumadija", "Ereignisse", "CAP Alerts / RHMZ", 300, "Warngebiete aus HA; bei fehlender Geometrie nur ausdrücklich gekennzeichnete Gebietsmitte.", color="#ffd16a"),
 }
 
+LAYERS["mapillary"]["max_area"] = 0.01
+
 SATELLITE_GROUPS = ("stations", "visual", "gps-ops", "galileo", "glonass", "geo", "starlink")

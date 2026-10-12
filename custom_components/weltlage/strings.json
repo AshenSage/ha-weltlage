@@ -20,7 +20,8 @@
       "already_configured": "Weltlage ist bereits eingerichtet."
     },
     "error": {
-      "invalid_key": "Schlüssel enthält unzulässige Zeichen oder ist zu lang."
+      "invalid_key": "Schlüssel enthält unzulässige Zeichen oder ist zu lang.",
+      "invalid_local_file": "weltlage_credentials.json im HA-Konfigurationsordner ist ungültig oder nicht lesbar."
     }
   },
   "options": {
@@ -40,7 +41,8 @@
       }
     },
     "error": {
-      "invalid_key": "Schlüssel enthält unzulässige Zeichen oder ist zu lang."
+      "invalid_key": "Schlüssel enthält unzulässige Zeichen oder ist zu lang.",
+      "invalid_local_file": "weltlage_credentials.json im HA-Konfigurationsordner ist ungültig oder nicht lesbar."
     }
   }
 }
