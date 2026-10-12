@@ -1,0 +1,57 @@
+name: Build and publish HACS package
+on:
+  release:
+    types: [published]
+  create:
+permissions:
+  contents: write
+concurrency:
+  group: weltlage-release-${{ github.event.release.tag_name || github.event.ref }}
+  cancel-in-progress: false
+jobs:
+  package:
+    if: github.event_name == 'release' || (github.event.ref_type == 'branch' && github.event.ref == 'release/v2.0.0-beta.1')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || github.event.ref }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci && python -m pip install aiohttp
+      - name: Validate publication ref against manifest
+        id: version
+        env:
+          PUBLICATION_REF: ${{ github.event.release.tag_name || github.event.ref }}
+        run: |
+          python - <<'PY'
+          import os,json,re
+          tag=os.environ['PUBLICATION_REF'].removeprefix('release/')
+          version=json.load(open('custom_components/weltlage/manifest.json'))['version']
+          assert re.fullmatch(r'\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?',version)
+          assert tag=='v'+version
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write('tag='+tag+'\n')
+          PY
+      - run: npm run build && npm test && npm run test:python
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:browser && npm run package
+      - name: Publish complete beta package
+        if: github.event_name == 'create'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PUBLICATION_TAG: ${{ steps.version.outputs.tag }}
+          PUBLICATION_SHA: ${{ github.sha }}
+        run: |
+          gh release create "$PUBLICATION_TAG" weltlage.zip --draft --prerelease --target "$PUBLICATION_SHA" --title "$PUBLICATION_TAG · Cesium-Globus" --notes-file docs/RELEASE_NOTES.md
+          gh release edit "$PUBLICATION_TAG" --draft=false --prerelease --latest=false
+      - name: Attach package to manually published release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PUBLICATION_TAG: ${{ steps.version.outputs.tag }}
+        run: gh release upload "$PUBLICATION_TAG" weltlage.zip --clobber

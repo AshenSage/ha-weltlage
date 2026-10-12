@@ -1,12 +1,9 @@
-import {createRequire} from 'node:module';
-import {readFile,writeFile} from 'node:fs/promises';
-import {fileURLToPath} from 'node:url';
-import {resolve,dirname} from 'node:path';
-const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
-const dep=process.env.WELTLAGE_NODE_MODULES;
-const require=createRequire(import.meta.url);
-const esbuild=dep?createRequire(resolve(dep,'../package.json'))('esbuild'):require('esbuild');
-const result=await esbuild.build({entryPoints:[resolve(root,'custom_components/weltlage/frontend/weltlage-card.js')],bundle:true,format:'iife',globalName:'WeltlagePreview',write:false,minify:true,target:'es2020',nodePaths:dep?[dep]:[]});
-const fixture=await readFile(resolve(root,'scripts/preview-fixture.js'),'utf8');
-const html=`<!doctype html><html lang="de"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Weltlage · Globus-Vorschau</title><style>body{margin:0;background:#071018;color:#edf4fa;font:14px/1.5 system-ui,sans-serif}main{max-width:1060px;margin:auto;padding:10px 8px 30px}header{padding:10px 10px 15px;color:#97adbf;font-size:12px}header strong{color:#ffc66b;display:block;font-size:13px}header p{margin:3px 0}header .demo{font-family:ui-monospace,monospace;letter-spacing:1px}weltlage-card{display:block}</style><main><header><strong class="demo">DEMO · BEISPIELDATEN</strong><p>Warnungen, Flüge und Bahnen sind synthetisch. Kamerapunkte: öffentlicher TfL-Beispielkatalog; Bilder werden erst beim Antippen vom Anbieter geladen.</p></header><weltlage-card></weltlage-card></main><script type="module">${(result.outputFiles[0].text+'\n'+fixture).replace(/<\/script/gi,'<\\/script')}</script></html>`;
-await writeFile(resolve(root,'VORSCHAU.html'),html);
+// Local UI preview: real Cesium renderer, explicitly simulated HA responses.
+import http from 'node:http';
+import {readFileSync,existsSync} from 'node:fs';
+import {resolve} from 'node:path';
+import {execFileSync} from 'node:child_process';
+const assets=resolve('custom_components/weltlage/frontend');
+const layers=JSON.parse(execFileSync('python',['-c',"import sys,json;sys.path.insert(0,'tests');import bootstrap;from weltlage_backend.layers import LAYERS;print(json.dumps(LAYERS))"],{encoding:'utf8'}));
+const html=`<!doctype html><html lang="de"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{background:#020811;color:white;margin:8px;font:13px system-ui;max-width:900px}p{color:#ffc36e}</style><p>UI-VORSCHAU · Cesium mit echten Kartenbildern. HA und Datenstatus simuliert; keine geprüfte Installation.</p><weltlage-card></weltlage-card><script type="module" src="/weltlage/weltlage-card.js"></script><script>customElements.whenDefined('weltlage-card').then(()=>{let c=document.querySelector('weltlage-card');c.setConfig({type:'custom:weltlage-card',title:'Weltlage'});c.hass={states:{},callWS:async m=>m.type==='weltlage/config'?{layers:${JSON.stringify(layers)},cesium_ion_token:''}:{status:'unavailable',message:'Nur UI-Vorschau',items:[]}}})</script></html>`;
+http.createServer((req,res)=>{let p=req.url.split('?')[0];if(p==='/'){res.setHeader('Content-Type','text/html');return res.end(html)}p=p.replace('/weltlage/cesium/1.146.0/','cesium/').replace('/weltlage/','');const f=resolve(assets,p);if(!f.startsWith(assets+'/')||!existsSync(f)){res.statusCode=404;return res.end()}res.setHeader('Content-Type',f.endsWith('.js')?'application/javascript':f.endsWith('.css')?'text/css':'application/octet-stream');res.end(readFileSync(f));}).listen(8080,'127.0.0.1',()=>console.log('UI preview http://127.0.0.1:8080 · simulated HA, no credentials'));

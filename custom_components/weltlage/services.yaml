@@ -1,6 +1,6 @@
 fetch_intel:
   name: Globus-Daten laden
-  description: Öffentliche Flugkontakte im gewählten Ausschnitt, Satelliten-Bahndaten oder offizielle Kamerakataloge laden. Flüge maximal einmal pro Minute, Bahndaten einmal pro zwei Stunden.
+  description: Legacy-Aufruf: begrenzten Backend-Cache für Flüge, Satelliten oder Fintraffic füllen. Ergebnisse erscheinen ausschliesslich in der Globuskarte, nicht in Sensorattributen.
   fields:
     kind:
       required: true
@@ -23,7 +23,7 @@ fetch_intel:
           max: 180
           mode: box
     provider:
-      description: Kameranetz (nur bei kind cameras). Katalog maximal einmal pro Stunde, nach Fehlern erneut nach einer Minute.
+      description: Legacy-Auswahl: nur finland wird noch unterstützt. Öffentliche Windy-Webcams direkt in der Karte laden.
       selector:
         select:
           options:

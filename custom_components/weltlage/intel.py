@@ -46,7 +46,7 @@ def parse_satellites(body, now):
         raise ValueError("Ungültige Bahndaten")
     fields = ["MEAN_MOTION", "ECCENTRICITY", "INCLINATION", "RA_OF_ASC_NODE", "ARG_OF_PERICENTER", "MEAN_ANOMALY", "BSTAR", "MEAN_MOTION_DOT", "MEAN_MOTION_DDOT"]
     items = []
-    for a in obj[:150]:
+    for a in obj[:2000]:
         if not isinstance(a, dict):
             continue
         epoch = stamp(str(a.get("EPOCH", "")) + ("Z" if not re.search(r"(?:Z|[+-]\d{2}:\d{2})$", str(a.get("EPOCH", ""))) else ""))
@@ -59,4 +59,4 @@ def parse_satellites(body, now):
         items.append({**values, "OBJECT_NAME": plain(a.get("OBJECT_NAME"), 80), "NORAD_CAT_ID": int(cat), "EPOCH": str(a["EPOCH"]), "epoch_timestamp": epoch, "OBJECT_ID": plain(a.get("OBJECT_ID"), 30)})
     if obj and not items:
         raise ValueError("Keine gültigen aktuellen Bahndaten")
-    return items[:80]
+    return items[:1000]
