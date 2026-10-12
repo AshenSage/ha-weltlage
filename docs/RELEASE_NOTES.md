@@ -1,18 +1,19 @@
-# Weltlage 2.0.1 · Kartenbasis und Cesium-Authentifizierung
+# Weltlage 2.1.0 · Scharfe Vektorkarte und erkennbare Objekte
 
-Dieses normale HACS-Release korrigiert zwei Fehler aus 2.0.0. Es enthält keine persönlichen Schlüssel.
+Dieses normale HACS-Release ersetzt die unscharfe Strassenkarte und generischen Punktmarker.
 
-- «Karte» verwendet Esri World Street Map. Die Karte benötigt keinen zusätzlichen Schlüssel und hängt nicht mehr von den Standard-OSM-Kacheln ab, die bei fehlendem Referrer HTTP 403 liefern können. Die erforderliche Attribution bleibt im Globus sichtbar.
-- Höhenmodell (ion-Asset 1) und Google Photorealistic 3D (ion-Asset 2275207) verwenden nun explizit authentifizierte `IonResource`-Objekte. Die vorher verwendeten Cesium-Hilfsfunktionen ignorierten den `accessToken` in ihren Darstellungsoptionen und nutzten den SDK-Demo-Token. Dadurch konnte trotz eingetragenem Schlüssel die grosse Demo-Token-Meldung erscheinen.
-- Der SDK-Demo-Token wird deaktiviert. Ohne eigenen ion-Token erfolgen keine ion-Anfragen; die normale Kartenbasis funktioniert weiterhin.
-- Scheitert der Aufbau einer Kartenbasis, bleibt die vorherige Basis erhalten. Verweigerter Terrain-/3D-Assetzugang wird verständlich angezeigt. Abgebrochene 3D-Auswahl fügt keinen veralteten Tileset hinzu.
+- Retina-Darstellung bis 2× Pixeldichte, Kantenglättung und feinere Globusdetails. Die bisherige doppelte Reduzierung der Renderauflösung auf hochauflösenden Handys entfällt.
+- «Karte» verwendet OpenFreeMap-/OpenMapTiles-Vektordaten. Linien und Flächen werden im Browser pro Zoomstufe neu gezeichnet; die alten Esri-Strassenbildkacheln entfallen. Kein zusätzlicher API-Key erforderlich.
+- Ortsnamen sind eigenständige Texteinblendungen, bleiben unabhängig von Kachelgrenzen lesbar und verdecken weder andere Ortsnamen noch Objektsymbole. Serbische Namen verwenden die gelieferten lateinischen Namen mit Sonderzeichen.
+- Unterschiedliche SVG-Symbole für Flugzeuge, Militärjets, Schiffe, Satelliten, Kameras, Verkehr, Störungen, Hotspots und Infrastruktur. Gelieferte Flug-/Schiffsrichtungen werden berücksichtigt. Keine erfundenen Einzelautos: das Autosymbol gehört zu einem TomTom-Verkehrssegment.
+- Dichte Gruppen erhalten ein Symbol mit Anzahl; Antippen zoomt zur Gruppe. Satellitenfarben und CAP-Warngebiete bleiben erhalten. Auch Werkzeugknöpfe verwenden klare SVG-Grafiken.
 
 ## Update
 
-HACS → Weltlage → ⋮ → Informationen aktualisieren → Erneut herunterladen → `v2.0.1`. Danach Home Assistant vollständig neu starten und die Dashboard-Seite neu laden. Vorhandene Schlüssel und die Dashboard-YAML bleiben erhalten. Falls noch kein Cesium-ion-Token eingetragen wurde: Einstellungen → Geräte & Dienste → Weltlage → Konfigurieren.
+HACS → Weltlage → Informationen aktualisieren → `v2.1.0` installieren. Danach Home Assistant vollständig neu starten und das Dashboard vollständig neu laden. Schlüssel, Favoriten und bestehende YAML bleiben erhalten.
 
-## Prüfungen und Grenzen
+## Nachweise und Grenzen
 
-63 Python-, fünf JavaScript- und 26 Browserprüfungen bestehen lokal. Der Veröffentlichungsvorgang wiederholt diese Prüfungen. Die Browserprüfung lädt echte Esri-Kacheln und prüft die Token-Übergabe mit ausschliesslich synthetischen Zugangsdaten und absichtlich verweigerten ion-Assets; sie verwendet keine privaten Schlüssel. Metadatenausfall einer Kartenbasis, fehlende Tokens, beide Asset-IDs, mobile Bedienung, Home, Tracking und Freigabe beim Entfernen sind geprüft.
+Die Browserprüfung verwendet reale Vektordaten und Smartphone-Pixeldichte 3× bei auf 2× begrenztem Renderbuffer. Aranđelovac-Nahansicht, globale Zentrierung, Objektsymbole, Gruppen, Auswahl, Tracking, fehlende Schlüssel und Freigabe beim Entfernen werden geprüft. HA und die markierten Testobjekte sind simuliert; keine privaten Schlüssel werden verwendet. Release-Prüfung und Quellenmatrix: `docs/TEST_REPORT.md`.
 
-World Street Map ist ein älterer Rasterdienst ohne laufende Aktualisierung; Esri plant seine Einstellung für Dezember 2029. Die Strassenkarte ist keine Zusage aktueller Strassenzustände. Quellenhinweise: `THIRD_PARTY.md`. Die verbleibenden regionalen Live-/Gerätenachweise aus 2.0.0 bleiben offen; ausführliche Matrix in `docs/TEST_REPORT.md`.
+Die Vektorgeometrie wird als hochauflösende Textur auf den Cesium-Globus gelegt; Ortsnamen sind separate native Labels. Daten können unvollständig sein. Satellitenbilder, Topografie und Fotorealistisch 3D behalten ihre jeweiligen Bild-/3D-Datenanbieter. Reale Smartphone-/Raspberry-Pi-Leistungsmessungen und die zuvor offenen regionalen Quellenprüfungen bleiben offen. Die neue Vektorkarte wird im Browser gerendert; die GPU-Auflösung ist zur Begrenzung der Last auf 2× gedeckelt.
