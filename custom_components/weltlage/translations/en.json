@@ -4,21 +4,43 @@
     "step": {
       "user": {
         "title": "Set up Weltlage",
-        "description": "Globe with public traffic cameras, flight snapshots and calculated satellite positions. USGS and GDACS update every five minutes. Extra layers load on request.",
-        "data": {}
+        "description": "Optionale Schlüssel lokal hinterlegen. Cesium wird im Browser verwendet und ist dort sichtbar. Daten werden nur für aktive Ebenen abgerufen. Leere Schlüssel deaktivieren die betreffende Quelle. Kostenlose Anbieter haben eigene Kontingente.",
+        "data": {
+          "cesium_ion_token": "Cesium ion · Browser-Token",
+          "windy_webcams_api_key": "Windy Webcams API v3",
+          "tomtom_api_key": "TomTom Traffic",
+          "mapillary_client_token": "Mapillary Client Token",
+          "nasa_firms_map_key": "NASA FIRMS Map Key",
+          "aisstream_api_key": "AISStream API Key",
+          "request_budget": "Maximale Abrufe pro Quelle / Tag"
+        }
       }
     },
     "abort": {
       "already_configured": "Weltlage is already configured."
+    },
+    "error": {
+      "invalid_key": "Schlüssel enthält unzulässige Zeichen oder ist zu lang."
     }
   },
   "options": {
     "step": {
       "init": {
         "title": "Configure Weltlage",
-        "description": "Globe with public traffic cameras, flight snapshots and calculated satellite positions. USGS and GDACS update every five minutes. Extra layers load on request.",
-        "data": {}
+        "description": "Optionale Schlüssel lokal hinterlegen. Cesium wird im Browser verwendet und ist dort sichtbar. Daten werden nur für aktive Ebenen abgerufen. Leere Schlüssel deaktivieren die betreffende Quelle. Kostenlose Anbieter haben eigene Kontingente.",
+        "data": {
+          "cesium_ion_token": "Cesium ion · Browser-Token",
+          "windy_webcams_api_key": "Windy Webcams API v3",
+          "tomtom_api_key": "TomTom Traffic",
+          "mapillary_client_token": "Mapillary Client Token",
+          "nasa_firms_map_key": "NASA FIRMS Map Key",
+          "aisstream_api_key": "AISStream API Key",
+          "request_budget": "Maximale Abrufe pro Quelle / Tag"
+        }
       }
+    },
+    "error": {
+      "invalid_key": "Schlüssel enthält unzulässige Zeichen oder ist zu lang."
     }
   }
 }

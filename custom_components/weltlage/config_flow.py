@@ -1,16 +1,24 @@
-"""Configure source selection and refresh interval through HA's UI."""
-try:
-    import probatio as vol
-except ImportError:
-    import voluptuous as vol
+"""Local HA options for six optional credentials and a conservative request budget."""
+import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.helpers import selector
 from .const import DOMAIN
+from .layers import KEYS
 
 
 def schema(values):
-    return vol.Schema({})
+    fields = {vol.Optional(k, description={"suggested_value": values.get(k, "")}): selector.TextSelector(selector.TextSelectorConfig(type=selector.TextSelectorType.PASSWORD)) for k in KEYS}
+    fields[vol.Optional("request_budget", default=values.get("request_budget", 500))] = vol.All(vol.Coerce(int), vol.Range(min=20, max=2000))
+    return vol.Schema(fields)
+
+
+def clean(values):
+    result = {k: str(values.get(k, "")).strip() for k in KEYS}
+    if any(len(v) > 4000 or any(ord(c) < 32 for c in v) for v in result.values()):
+        raise ValueError("invalid_key")
+    result["request_budget"] = values.get("request_budget", 500)
+    return result
 
 
 class WeltlageConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -21,7 +29,10 @@ class WeltlageConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self._abort_if_unique_id_configured()
         errors = {}
         if user_input is not None:
-            return self.async_create_entry(title="Weltlage", data={})
+            try:
+                return self.async_create_entry(title="Weltlage", data=clean(user_input))
+            except ValueError:
+                errors["base"] = "invalid_key"
         return self.async_show_form(step_id="user", data_schema=schema(user_input or {}), errors=errors)
 
     @staticmethod
@@ -33,7 +44,10 @@ class WeltlageConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 class WeltlageOptionsFlow(config_entries.OptionsFlow):
     async def async_step_init(self, user_input=None):
         errors = {}
-        if user_input is not None:
-            return self.async_create_entry(title="", data={})
         values = {**self.config_entry.data, **self.config_entry.options}
+        if user_input is not None:
+            try:
+                return self.async_create_entry(title="", data=clean(user_input))
+            except ValueError:
+                errors["base"] = "invalid_key"
         return self.async_show_form(step_id="init", data_schema=schema(user_input or values), errors=errors)

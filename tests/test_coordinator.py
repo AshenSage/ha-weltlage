@@ -175,7 +175,7 @@ class CoordinatorTests(IsolatedAsyncioTestCase):
                 with patch.object(c.time,'time',return_value=now):await self.coordinator.async_fetch_intel('cameras',51,0,'london')
             self.assertEqual(len(self.requests),1)
             state=self.coordinator.intel['cameras']['providers']['london'];self.assertEqual(len(state['items']),1)
-            self.assertEqual(self.requests[0][1]['Digitraffic-User'],'ha-weltlage/1.2.0')
+            self.assertEqual(self.requests[0][1]['Digitraffic-User'],'ha-weltlage/'+c.VERSION)
             self.responses['good']=(503,b'down')
             with patch.object(c.time,'time',return_value=13600):await self.coordinator.async_fetch_intel('cameras',51,0,'london')
             state=self.coordinator.intel['cameras']['providers']['london'];self.assertEqual(state['last_success'],10000);self.assertEqual(len(state['items']),1);self.assertIsNotNone(state['error'])

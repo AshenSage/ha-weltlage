@@ -121,3 +121,24 @@ SOFTWARE.
 
 ```
 
+
+## Cesium-Rework (2.0)
+
+- CesiumJS 1.146.0: Apache-2.0, vollständige Lizenz und Fremdlizenzen im gebündelten `frontend/cesium/LICENSE.md` und Legal-Dateien. [CesiumJS](https://github.com/CesiumGS/cesium), [ion-Nutzungsbedingungen](https://cesium.com/legal/terms-of-service/). Die Browserdarstellung lässt die Cesium-/Datencredits sichtbar.
+- God's Eye View, Commit 591f299, Bilawal Sidhu (2026): MIT **nur für Quellcode**. Unveränderte Module `satelliteClass.js` und `worldFocus.js`; vollständiger Hinweis in `frontend_src/vendor/GODS-EYE-LICENSE`. Keine extern lizenzierten Originalmodelle oder Nepal-Datensätze kopiert.
+- Google Photorealistic 3D Tiles via Cesium ion: Anbieterbedingungen und Attribution bleiben verbindlich; verfügbare Regionen und Kontingente hängen vom Konto ab. Kein Offlinepaket und keine Zusage flächendeckender Abdeckung.
+- OpenStreetMap / Overpass: ODbL, © OpenStreetMap contributors. [Kachelnutzungsregeln](https://operations.osmfoundation.org/policies/tiles/); kein Prefetch oder Offlinepaket.
+- OpenTopoMap: © OpenStreetMap contributors, SRTM; Darstellung CC BY-SA. [Quelle und Hinweise](https://opentopomap.org/about).
+- Windy API v3: Bilder und Webcam-Inhalte behalten ihre Anbieterrechte; [API-Bedingungen](https://api.windy.com/webcams/terms). Unveränderte API-URLs, keine Vergrösserung, Pflichtverlinkung und Courtesy-Hinweis. Free-Bildlinks verfallen gemäss Dokumentation nach zehn Minuten.
+- TomTom: [Traffic API](https://developer.tomtom.com/traffic-api/documentation/traffic-flow/flow-segment-data), Anbieterbedingungen und Kontingente. Segmentdaten und Störungen werden getrennt und als unvollständige Anbieterinformationen bezeichnet.
+- Mapillary: [Dokumentation](https://www.mapillary.com/developer/api-documentation/), Anbieterbedingungen und jeweilige Bildrechte. Foto-/Quelllink und Aufnahmedatum bleiben sichtbar; kein Live-Anspruch.
+- AISStream: [Dokumentation](https://aisstream.io/documentation). Live empfangene, unvollständige öffentliche AIS-Positionsmeldungen; kein Archiv oder Abdeckungsgarantie.
+- EMSC / Seismic Portal: [FDSN-Service](https://www.seismicportal.eu/fdsn-wsevent.html); Quelle, Magnitude, Tiefe und Datum werden angegeben.
+- NASA FIRMS: [API](https://firms.modaps.eosdis.nasa.gov/api/), öffentlich verfügbare VIIRS-Daten, NASA-FIRMS-Attribution. Thermische Anomalien sind keine bestätigten Brände.
+- NASA GIBS / MODIS Terra: [GIBS-Dokumentation](https://nasa-gibs.github.io/gibs-api-docs/). Datierte Tagesmosaike, keine Echtzeitaufnahme.
+- RainViewer: [API](https://www.rainviewer.com/api.html). Beobachtete Radarframes; Quelle, Zeit und räumliche Lücken beachten.
+- NOAA nowCOAST: [Dienst](https://nowcoast.noaa.gov/), globales Longwave-IR-Mosaik, sichtbare Zeitangabe; keine reine Wolkenmaske.
+- Open-Meteo: [Lizenz und Bedingungen](https://open-meteo.com/en/terms), CC BY 4.0, Nutzung ohne Schlüssel nur gemäss Anbieterbedingungen; Wind ist eine Modellschätzung.
+- TeleGeography: schematische Kabelgeometrien, CC BY-NC-SA 3.0 gemäss Original-Quellenkatalog; **keine kommerzielle Nutzung** ohne gesonderte Rechte. [Kabelkarte](https://www.submarinecablemap.com/).
+
+Die oben erhaltenen älteren Natural-Earth/d3/TfL/DriveBC-Hinweise betreffen Vorgängercode. Der neue Cesium-Produktionsbuild enthält keine d3-/Natural-Earth-Basis und keinen TfL-/DriveBC-Layer.

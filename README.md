@@ -1,56 +1,31 @@
-# Weltlage · God's Eye für Home Assistant · 1.2.0
+# Weltlage · Cesium für Home Assistant
 
-Nur der Globus. Eine mobile Einsatzzentrale mit dunkler taktischer Optik, öffentlichen Verkehrskameras, Flugkontakten und berechneten Satellitenpositionen. Nachrichten, Kennzahlenkarten und die externe World-Monitor-Ansicht sind entfernt. Auch die bisherigen Nachrichtenquellen werden nicht mehr abgefragt.
+**2.0.0-dev.1 ist ein Entwurf, keine freigegebene HACS-Version.** Der Rework ersetzt den Canvas-Globus durch lokal gebündeltes Cesium 1.146.0. Bestehende Karten behalten `custom:weltlage-card`, CAP-Entitäten und `alert_areas`; `max_items` und `show_globe` werden weiterhin akzeptiert.
 
-![Mobiler Intel-Globus – Beispieldaten](docs/globus-mobile.png)
+Beim Öffnen erscheint die ganze Erde mit Atmosphäre und Aranđelovac im Bildzentrum. Die Kameradistanz richtet sich nach dem verfügbaren Bildbereich. Home stellt diese Ansicht wieder her. Schnellziele führen nach Aranđelovac, Balkan, Europa und Schweiz. Koordinaten: 44.30694 N, 20.56 E ([verifizierte Ortskoordinaten](https://www.geodatos.net/en/coordinates/serbia/arandelovac)). Die letzte Kameraposition wird bewusst nicht wiederhergestellt.
 
-## Bedienung
+## Oberfläche
 
-- **Drehen / zoomen:** ein Finger dreht, zwei Finger zoomen. +/− und Pfeiltasten funktionieren ebenfalls. Der Knopf rechts oben öffnet echtes Vollbild; die Steuerung bleibt als Schublade am unteren Rand.
-- **Ebenen:** Erdbeben, Katastrophen, Flüge, Satelliten, Ortsmarken, regionale Wetterwarnungen und Kameras. Ein Objekt antippen oder über «Objekte» suchen. Dichte Kamerapunkte werden zusammengefasst; Antippen zoomt hinein.
-- **Objekte:** «Im Ausschnitt» oder «Weltweit», mit Suche und Sortierung nach Entfernung, Zeit oder Name. Datenmengen und sichtbare Signale werden getrennt angezeigt; Ortsmarken zählen nicht als Signale im unteren Zähler.
-- **Ansicht:** Welt, Europa, Schweiz und Serbien. Taktische Darstellung in Grün oder Cyan. «Nachtsicht» ist ein Darstellungsstil, keine Messung. Tag/Nacht ist eine angenäherte UTC-Beleuchtungsgrenze.
-- **Satellitbild:** optionaler Esri-World-Imagery-Hintergrund direkt auf dem drehbaren Globus. Bilder werden erst nach Aktivierung für die sichtbare Ansicht geladen; maximal vier parallele Bildabrufe, begrenzter Speicher im Browser. Die Bildquelle bleibt auf dem Globus sichtbar. Das sind Hintergrundaufnahmen, keine Livebilder und keine 3D-Gebäude.
-- Position, Zoom, aktive Ebenen und Darstellungsstil werden im Browser auf diesem Gerät gemerkt. Der 60-Sekunden-Flugmodus startet nach erneutem Öffnen ausgeschaltet.
+Globus, kompakte Werkzeugleiste und Layer darunter, ohne Nachrichten- oder Kennzahlenkarten. Ein Finger dreht, zwei Finger zoomen. Details, Verfolgung und Kamerafavoriten erscheinen unten. Kartenbasis: Karte, Satellit, Hybrid, Topografie und Google Photorealistic 3D Tiles via ion. Das echte Höhenmodell ist separat schaltbar. Welt Terrain ist Asset 1; Google 3D ist Asset 2275207. Es gibt keine zweite Gebäudeschicht und deshalb keine überlagerten OSM-Gebäude.
 
-## Verkehrskameras
+Kartenstil, Layer, Satellitenkategorie, Effekte und Favoriten werden gerätebezogen im Browser gespeichert. Nachtsicht, FLIR und CRT sind ausdrücklich **visuelle Effekte**, keine Wärmebild- oder Erkennungsdaten. Suche umfasst geladene Objekte, Schnellziele und Eingaben `Breite,Länge`; eine weltweite Ortssuche ist noch nicht implementiert.
 
-Unter «Ebenen» das Kameranetz wählen, «Kameras laden» und «Zum Kameranetz» nutzen. Die erste Version enthält:
+## Einrichtung nach einer freigegebenen Version
 
-| Netz | Quelle | Bilder |
-| --- | --- | --- |
-| London | TfL JamCams | öffentliche, aktualisierte Standbilder |
-| Finnland | Fintraffic / Digitraffic | Strassen- und Wetterkameras, mehrere Blickrichtungen |
-| British Columbia | DriveBC | öffentliche Highway-Kameras |
+1. Weltlage über HACS aktualisieren und Home Assistant neu starten.
+2. Einstellungen → Geräte & Dienste → Weltlage → Konfigurieren. Die sechs optionalen Schlüssel lokal eingeben.
+3. Dashboard neu laden. Bei einem alten Browsercache einmal vollständig neu laden. Die Lovelace-Ressource bekommt automatisch die installierte Version plus Build-Hash; keine manuelle Versionsnummer nötig.
 
-Kataloge werden nur auf Anforderung abgefragt und pro Netz eine Stunde zwischengespeichert. Höchstens 600 Kameras pro Netz kommen in den HA-Zustand; bei grösseren Netzen sind es die nächsten zum Globuszentrum beim Abruf. Die vollständige Anzahl steht beim Katalogstatus. Nach einem fehlgeschlagenen Abruf ist ein neuer Versuch nach einer Minute möglich.
-
-**Nur die ausgewählte Kamera lädt ein Bild.** Das originale Anbieterbild wird unverzerrt mit Quellenangabe angezeigt. Keine Bildmauer, die hunderte Kameras gleichzeitig lädt. Die Ansicht zeigt den Zeitpunkt des erfolgreichen Ladens; die Aufnahmezeit wird nur vom Anbieterbild übernommen, wenn sie dort vorhanden ist. Bei Ausfällen wird kein Ersatzbild als aktuelle Kamera ausgegeben; ein bereits geladenes Bild bleibt sichtbar. Die automatische Bildprüfung läuft nur bei sichtbarer Auswahl, entsprechend dem Netz etwa alle drei bis zehn Minuten. Manuelles Aktualisieren frühestens nach einer Minute.
-
-Für CH und RS ist in dieser Ausgabe noch kein öffentliches Kameranetz eingebunden. NSW wurde geprüft und wegen nicht nutzbarer Anbieterbilder nicht aktiviert. Es werden keine Bilder aufgezeichnet oder im HA-Backend gespeichert.
-
-![Kameraauswahl – Bild im Test durch DEMO-Grafik ersetzt](docs/kamera-mobile.png)
-
-## Flüge und Satelliten
-
-**Flüge:** adsb.lol, 250 nautische Meilen (463 km) um die aktuelle Globusmitte. Das Zentrum wird auf ein 5°-Raster gerundet und stammt vom Globus. «Diesen Ausschnitt laden» erzeugt eine regionale Aufnahme. Beim Drehen wird eine abweichende geladene Region sichtbar; «Zur geladenen Region» führt zurück. Positionen über 120 Sekunden Alter werden entfernt. Ein optionaler **60 s ↻**-Modus lädt nur bei sichtbarer Karte nach und pausiert im Hintergrund. Der Backend-Deckel von einer Anfrage pro Minute gilt auch über mehrere Karten hinweg. Die Spur eines ausgewählten Fluges verbindet nur tatsächlich empfangene Positionen der letzten zehn Minuten.
-
-**Satelliten:** CelesTrak-Bahndaten für ISS und Raumstationen, maximal alle zwei Stunden. Positionen werden lokal mit satellite.js / SGP4 berechnet. «ISS verfolgen» hält deren Bodenposition im Mittelpunkt; manuelles Drehen beendet das Folgen. Eine Auswahl zeigt Höhe, Bahnepoche und die berechnete Bodenspur der nächsten 90 Minuten. Bahnepochen älter als 14 Tage werden verworfen. Keine globale Echtzeitmessung aller Satelliten.
-
-**Ereignisse:** USGS-Erdbeben M ≥ 4.5 aus den letzten 24 Stunden, GDACS Orange / Rot ohne doppelte Erdbeben; Prüfung alle fünf Minuten. CAP liest die Karte aus deiner bestehenden HA-Integration. RS010-Warnungen stehen an der ausdrücklich als ungefähr bezeichneten Gebietsmitte Šumadija, nicht am exakten Ort eines Ereignisses.
-
-## Installation und Updates
-
-**Home Assistant 2026.10.0 oder neuer.** In HACS als benutzerdefiniertes Repository `https://github.com/AshenSage/ha-weltlage` vom Typ **Integration** hinzufügen, herunterladen und HA vollständig neu starten. Unter Einstellungen → Geräte & Dienste die Integration **Weltlage** hinzufügen. Die Karte und ihre gebündelten Bibliotheken werden von HA bereitgestellt; keine separat installierte God’s-Eye-Anwendung nötig.
-
-Bestehende Karten vom Typ `custom:weltlage-card` wechseln automatisch zur Globusansicht. Bisherige Nachrichtenoptionen wie `max_items`, `compact_news` und `show_map` werden ignoriert. Auch `show_globe: false` blendet den einzigen Inhalt nicht mehr aus. Alte Feed-Optionen werden nicht mehr zum Nachrichtenabruf verwendet. Der bestehende Lagebild-Sensor behält seine ID; sein Zahlenwert zählt nun Naturereignisse statt Nachrichten.
-
-**Update:** HACS → Weltlage → ⋮ → **Erneut herunterladen**, bei Bedarf **main** auswählen. Dann **HA neu starten und die App / Browserseite neu laden**. Oben im Globus steht **v1.2.0**. Die Ressourcen-URL wird automatisch auf die installierte Ausgabe umgestellt; keine manuelle Versionsnummer oder Änderung im Ressourcenmenü nötig. Updates werden weiterhin über HACS installiert.
+Der Entwurfsbranch soll noch **nicht** als reguläres HACS-Update installiert werden. Das vollständige Review-Paket entsteht in GitHub Actions. Eine Freigabe veröffentlicht `weltlage.zip`, das alle Cesium-Worker, Widgets, Bilder und JavaScript-Dateien enthält. Ein zusätzlicher Node-Dienst ist nicht notwendig.
 
 ```yaml
 type: custom:weltlage-card
-title: "GOD'S EYE"
-region: world
+title: Weltlage
+show_globe: true
+map_style: satellite
+default_layers:
+  - cap
+storage_key: arandjelovac
 alert_count_entity: sensor.cap_alerts_wmo_alert_count
 alert_updated_entity: sensor.cap_alerts_wmo_last_updated
 alert_areas:
@@ -58,20 +33,52 @@ alert_areas:
 alert_label: Serbien · Šumadija
 ```
 
-Die Lagebild-Entität wird automatisch erkannt. Optional `entity: sensor.weltlage_lagebild` setzen. `region` bestimmt die erste Ansicht; später gilt die auf diesem Gerät gemerkte Position. Die Dateien in `dashboard/` liefern eine eigene Panel-Ansicht für das bestehende Dashboard oder ein separates Dashboard.
+`default_layers` gilt bei einem frischen Browserprofil. Bereits gespeicherte Einstellungen haben Vorrang. `map_style` kann `map`, `satellite`, `hybrid`, `topo` oder `photo` sein.
 
-## Vorschau und Entwicklung
+## Schlüssel und Kontingente
 
-`VORSCHAU.html` enthält die echte Karte samt Globus, mit synthetischen Ereignissen, Warnungen, Flügen und Bahnen. Der kleine Kamera-Beispielkatalog stammt aus öffentlichen TfL-Daten; ein ausgewähltes Bild wird direkt vom Anbieter geladen. Erst das Aktivieren von «Satellitbild» lädt Esri-Bildkacheln. Im Browser-Test werden externe Bilder durch klar gekennzeichnete DEMO-Grafiken ersetzt.
+| Lokales Feld | Verwendung |
+|---|---|
+| Cesium ion | Browser-Token für World Terrain und optional Google 3D; Zugriff auf Assets und erlaubte Origins beschränken |
+| Windy Webcams API v3 | Backend-Katalog und Kameraeinzelabruf |
+| TomTom | Backend-Verkehrsfluss und Störungen |
+| Mapillary | Backend-Bildkatalog; die bereitgestellten Bilder werden im Browser geladen |
+| NASA FIRMS | Backend-VIIRS-Hotspots |
+| AISStream | Backend-AIS-WebSocket mit kurzen regionalen Empfangsfenstern |
 
-```bash
-npm install
+Kein Schlüssel steht im Repository. Backend-Schlüssel werden nicht über die Globus-API an den Browser geschickt; notwendiger ion-Token, Bildlinks und externe Medien sind im Browser sichtbar. Diagnoseexporte enthalten nur boolesche Angaben über konfigurierte Schlüssel. Leere Felder deaktivieren die entsprechende Quelle. Die Eingabe validiert Form und Länge; die tatsächliche Gültigkeit wird beim ersten Abruf geprüft und separat gemeldet. Anbieterlimits gelten zusätzlich zum konfigurierbaren lokalen Tageslimit von standardmässig 500 Aufrufen je Quelle.
+
+Keine bezahlten Upgrades werden vorgenommen. Kartenkacheln, ion-Assets und Bilder gehen direkt vom Browser zum Anbieter und werden nicht vom Backend-Tageslimit erfasst. Free-Tarife sind keine Zusage unbegrenzter Nutzung oder vollständiger Abdeckung.
+
+## Daten und Grenzen
+
+[Prüfbericht und Quellenmatrix](docs/TEST_REPORT.md) enthält die Live-Nachweise und offenen Punkte. Hauptlayer sind ADS-B, Satelliten, Windy, Fintraffic, Radar, globales IR, Windmodell, TomTom, AISStream, EMSC, FIRMS, Mapillary, NASA-Tagesmosaik, OSM-Infrastruktur, Kabel, GDACS und CAP.
+
+Globale Kameradistanz löst keine unbegrenzten regionalen Abrufe aus. Kleine Layer melden «Näher zoomen». Ohne Treffer wird nicht automatisch «keine Abdeckung» behauptet. Satellitenpositionen werden aus maximal 14 Tage alten Bahnelementen in einem Worker berechnet. Windpfeile zeigen Modellrichtung. Flugspuren verbinden tatsächlich empfangene Positionssnapshots; sie sind keine Rekonstruktion des vollständigen Flugwegs. Radar läuft durch beobachtete Frames, deren Zeitpunkt an der Schaltfläche steht. Rasterzeiten sind Quellen-/Framezeiten, keine Garantie, dass jeder Pixel zur gleichen Zeit aufgenommen wurde.
+
+Windy liefert maximal 50 Kameras pro Ausschnitt; eine mögliche Kürzung wird in der API-Antwort angegeben. Bilder werden erst beim Antippen geladen. API-Bildlinks werden unverändert benutzt, nicht hochskaliert und nicht in 3D projiziert. Anbieterzeit wird von Ladezeit unterschieden. Favoriten enthalten keine kurzlebigen Bildlinks. Quelle und Windy-Verlinkung sind sichtbar. [Dokumentation](https://api.windy.com/webcams/docs), [Bedingungen](https://api.windy.com/webcams/terms).
+
+CAP verwendet verfügbare Warnpolygone. Ohne Geometrie ist nur eine ausdrücklich angenäherte Gebietsmitte Šumadija sichtbar. Mehrere Polygone einer Warnung werden derzeit auf das erste gültige Polygon begrenzt. GDACS zeigt orange/rote Meldungen ohne EQ-Duplikate.
+
+## Architektur / Entwicklung
+
+Authentifizierte Home-Assistant-WebSocket-Kommandos `weltlage/config`, `weltlage/layer` und `weltlage/camera`. Validierte Layernamen, Grenzen, Filter und Datumsangaben; keine vom Client wählbaren Proxy-URLs. Gemeinsamer Backend-Cache, maximal drei parallele HTTP-Abrufe, begrenzte Antwortgrössen, Backoff und lokale Tageslimits. Grössere Kataloge gehen nicht in Recorder-Sensorattribute. Die bisherigen Sensor-/Button-IDs bleiben erhalten, die alten Hintergrundpolls werden gestoppt. Der Legacy-Service ist nur als begrenzter Aufruf erhalten.
+
+```sh
+npm ci
+python -m pip install aiohttp
 npm run build
-npm run preview
-python3 -m unittest discover -s tests -v
 npm test
-npm run test:dom
+npm run test:python
+npx playwright install --with-deps chromium
 npm run test:browser
+npm run package
 ```
 
-Eigener Code: MIT. Datenquellen und Bibliothekslizenzen: [THIRD_PARTY.md](THIRD_PARTY.md). Prüfumfang und praktische Grenzen: [TESTBERICHT.md](TESTBERICHT.md). Der Globus übernimmt Ideen von [God's Eye View](https://github.com/bilawalsidhu/gods-eye-view), ist eine eigene schlanke HA-Implementierung.
+`npm run preview` startet eine lokale **UI-Vorschau mit simuliertem HA**. Sie liefert keine produktiven oder vorgetäuschten Live-Objekte. Die generierten Frontend-Dateien sind Build-Ausgabe und werden im HACS-ZIP statt als grosse, handgepflegte Git-Dateien verteilt. GitHub Actions baut und prüft das Review-Paket; der Release-Workflow verlangt eine zum Manifest passende Versionsmarke.
+
+## Original und Lizenzen
+
+God's Eye View wurde auf Commit `591f299` untersucht. Übernommen: `satelliteClass.js` und `worldFocus.js` (MIT). Die vollständige Original-Lizenz liegt unter `frontend_src/vendor/GODS-EYE-LICENSE`. Dessen Node-Server, Sprachsteuerung, SDR, Nepal-Szene, synthetische Verkehrsdarstellung, USA-spezifische ÖV-/Radar-/Blitzlayer und lokale Fremddatensammlungen werden nicht übernommen. Fintraffic bleibt eine regionale Ergänzung; Windy ist als Hauptkatalog vorbereitet, aber regional noch nicht bestätigt. AMSS und Schweizer Spezialnetze sind ohne geprüfte Bildnutzung noch nicht integriert. Ein globaler CMR-Suchkatalog, Cockpitansicht und optionale Kamerapersistenz fehlen noch.
+
+[Quellen- und Lizenzangaben](THIRD_PARTY.md).

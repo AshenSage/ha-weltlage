@@ -6,7 +6,7 @@ from pathlib import Path
 from types import SimpleNamespace, ModuleType
 import sys
 from unittest import IsolatedAsyncioTestCase
-from unittest.mock import Mock
+from unittest.mock import Mock, AsyncMock
 
 from aiohttp import web, ClientSession
 import bootstrap
@@ -66,6 +66,9 @@ sys.modules.setdefault(ll_resources.__name__, ll_resources)
 http = ModuleType("homeassistant.helpers.http")
 http.HomeAssistantView = type("HomeAssistantView", (), {})
 sys.modules.setdefault(http.__name__, http)
+static_http = ModuleType("homeassistant.components.http")
+static_http.StaticPathConfig = lambda url, path, cache: SimpleNamespace(url=url, path=path, cache=cache)
+sys.modules.setdefault(static_http.__name__, static_http)
 frontend = import_module("weltlage_backend.frontend")
 
 FOREIGN = {"id": "foreign", "url": "/hacsfiles/another-card.js?v=7", "type": "module", "custom_field": "retained"}
@@ -76,13 +79,13 @@ class FrontendTests(IsolatedAsyncioTestCase):
         collection = ResourceStorageCollection(items)
         async def executor(fn):
             return await asyncio.to_thread(fn)
-        return SimpleNamespace(data={"lovelace": SimpleNamespace(resources=collection)}, http=SimpleNamespace(register_view=Mock()), async_add_executor_job=executor)
+        return SimpleNamespace(data={"lovelace": SimpleNamespace(resources=collection)}, http=SimpleNamespace(register_view=Mock(), async_register_static_paths=AsyncMock()), async_add_executor_job=executor)
 
     async def test_first_install_creates_resource_and_exposes_only_two_files(self):
         hass = self.make_hass([FOREIGN])
         await frontend.async_register_frontend(hass)
         views = [call.args[0] for call in hass.http.register_view.call_args_list]
-        self.assertEqual({v.url for v in views}, {"/weltlage/weltlage-card.js", "/weltlage/weltlage-globe.js"})
+        self.assertEqual({v.url for v in views}, {"/weltlage/weltlage-card.js", "/weltlage/satellite-worker.js"})
         self.assertTrue(all(not v.requires_auth for v in views))
         collection = hass.data["lovelace"].resources
         self.assertEqual(collection.data[0], FOREIGN)
@@ -120,7 +123,7 @@ class FrontendTests(IsolatedAsyncioTestCase):
         await frontend.async_register_frontend(hass)
         old = deepcopy(hass.data["lovelace"].resources.data)
         next_hass = self.make_hass(old)
-        next_hass.data["weltlage"] = {"frontend_assets": {"weltlage-card.js": b"new", "weltlage-globe.js": b"new globe"}, "frontend_revision": "newrevision"}
+        next_hass.data["weltlage"] = {"frontend_assets": {"weltlage-card.js": b"new", "satellite-worker.js": b"new globe"}, "frontend_revision": "newrevision"}
         await frontend.async_register_frontend(next_hass)
         current = next_hass.data["lovelace"].resources.data[0]
         self.assertNotEqual(current["url"], old[0]["url"])
@@ -160,7 +163,7 @@ class FrontendTests(IsolatedAsyncioTestCase):
         port = site._server.sockets[0].getsockname()[1]
         try:
             async with ClientSession() as client:
-                for name in ("weltlage-card.js", "weltlage-globe.js"):
+                for name in ("weltlage-card.js", "satellite-worker.js"):
                     async with client.get(f"http://127.0.0.1:{port}/weltlage/{name}?v=1.0.0", headers={"If-None-Match": '"old"', "If-Modified-Since": "Wed, 01 Jan 2031 00:00:00 GMT"}) as response:
                         self.assertEqual(response.status, 200)
                         self.assertEqual(response.headers["Cache-Control"], "no-store, max-age=0")

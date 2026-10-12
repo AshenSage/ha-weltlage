@@ -4,6 +4,7 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 from aiohttp import web
+from homeassistant.components.http import StaticPathConfig
 from homeassistant.components.lovelace.const import LOVELACE_DATA
 from homeassistant.components.lovelace.resources import ResourceStorageCollection
 from homeassistant.helpers.http import HomeAssistantView
@@ -11,7 +12,8 @@ from homeassistant.helpers.http import HomeAssistantView
 from .const import DOMAIN, VERSION
 
 CARD_URL = "/weltlage/weltlage-card.js"
-_ASSETS = ("weltlage-card.js", "weltlage-globe.js")
+_ASSETS = ("weltlage-card.js", "satellite-worker.js")
+CESIUM_VERSION = "1.146.0"
 _OWN_PATHS = {CARD_URL, "/local/weltlage/weltlage-card.js"}
 _HEADERS = {
     "Cache-Control": "no-store, max-age=0",
@@ -78,6 +80,10 @@ async def _async_update_resource(hass, revision):
 
 async def async_register_frontend(hass):
     state = hass.data.setdefault(DOMAIN, {})
+    if not state.get("cesium_registered"):
+        folder = str(Path(__file__).parent / "frontend" / "cesium")
+        await hass.http.async_register_static_paths([StaticPathConfig(f"/weltlage/cesium/{CESIUM_VERSION}", folder, True)])
+        state["cesium_registered"] = True
     if "frontend_revision" not in state:
         assets, revision = await hass.async_add_executor_job(_read_assets)
         state["frontend_assets"] = assets

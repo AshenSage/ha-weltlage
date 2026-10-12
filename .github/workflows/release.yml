@@ -1,0 +1,31 @@
+name: Package published HACS release
+on:
+  release:
+    types: [published]
+permissions:
+  contents: write
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci && python -m pip install aiohttp
+      - name: Require manifest version to match release tag
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: python -c 'import os,json; assert os.environ["RELEASE_TAG"].lstrip("v")==json.load(open("custom_components/weltlage/manifest.json"))["version"]'
+      - run: npm run build && npm test && npm run test:python && npm run package
+      - name: Attach bundled integration
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: gh release upload "$RELEASE_TAG" weltlage.zip --clobber
