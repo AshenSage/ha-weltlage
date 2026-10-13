@@ -1,6 +1,6 @@
 """Bounded, keyless data sources for Weltlage."""
 DOMAIN = "weltlage"
-VERSION = "2.1.0"
+VERSION = "2.1.1"
 MAX_BYTES = 2_000_000
 MAX_ARTICLES = 120
 RETENTION_HOURS = 72

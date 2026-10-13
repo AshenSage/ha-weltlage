@@ -1,19 +1,9 @@
-# Weltlage 2.1.0 · Scharfe Vektorkarte und erkennbare Objekte
+# Weltlage 2.1.1 · Gültige Aktionsbeschreibung
 
-Dieses normale HACS-Release ersetzt die unscharfe Strassenkarte und generischen Punktmarker.
+Behebt den YAML-Parserfehler in `services.yaml`, durch den Home Assistant die Beschreibung von `weltlage.fetch_intel` nicht laden konnte. Die Auswahlfelder und Vorgabewerte entsprechen dem vorhandenen Backend. Kameras über die alte Aktion unterstützen nur `provider: finland`; öffentliche Webcams werden weiter direkt im Globus geladen.
 
-- Retina-Darstellung bis 2× Pixeldichte, Kantenglättung und feinere Globusdetails. Die bisherige doppelte Reduzierung der Renderauflösung auf hochauflösenden Handys entfällt.
-- «Karte» verwendet OpenFreeMap-/OpenMapTiles-Vektordaten. Linien und Flächen werden im Browser pro Zoomstufe neu gezeichnet; die alten Esri-Strassenbildkacheln entfallen. Kein zusätzlicher API-Key erforderlich.
-- Ortsnamen sind eigenständige Texteinblendungen, bleiben unabhängig von Kachelgrenzen lesbar und verdecken weder andere Ortsnamen noch Objektsymbole. Serbische Namen verwenden die gelieferten lateinischen Namen mit Sonderzeichen.
-- Unterschiedliche SVG-Symbole für Flugzeuge, Militärjets, Schiffe, Satelliten, Kameras, Verkehr, Störungen, Hotspots und Infrastruktur. Gelieferte Flug-/Schiffsrichtungen werden berücksichtigt. Keine erfundenen Einzelautos: das Autosymbol gehört zu einem TomTom-Verkehrssegment.
-- Dichte Gruppen erhalten ein Symbol mit Anzahl; Antippen zoomt zur Gruppe. Satellitenfarben und CAP-Warngebiete bleiben erhalten. Auch Werkzeugknöpfe verwenden klare SVG-Grafiken.
+Zusätzliche Regressionstests prüfen alle Komponenten-YAML-Dateien und die unterstützten Aktionsfelder vor der Veröffentlichung. Die Browser-Testdaten lesen die Backend-Version jetzt aus dem Manifest.
 
-## Update
+Normales stabiles HACS-Release. HACS → Weltlage → Informationen aktualisieren → `v2.1.1` installieren. Danach Home Assistant neu starten und das Dashboard vollständig neu laden.
 
-HACS → Weltlage → Informationen aktualisieren → `v2.1.0` installieren. Danach Home Assistant vollständig neu starten und das Dashboard vollständig neu laden. Schlüssel, Favoriten und bestehende YAML bleiben erhalten.
-
-## Nachweise und Grenzen
-
-Die Browserprüfung verwendet reale Vektordaten und Smartphone-Pixeldichte 3× bei auf 2× begrenztem Renderbuffer. Aranđelovac-Nahansicht, globale Zentrierung, Objektsymbole, Gruppen, Auswahl, Tracking, fehlende Schlüssel und Freigabe beim Entfernen werden geprüft. HA und die markierten Testobjekte sind simuliert; keine privaten Schlüssel werden verwendet. Release-Prüfung und Quellenmatrix: `docs/TEST_REPORT.md`.
-
-Die Vektorgeometrie wird als hochauflösende Textur auf den Cesium-Globus gelegt; Ortsnamen sind separate native Labels. Daten können unvollständig sein. Satellitenbilder, Topografie und Fotorealistisch 3D behalten ihre jeweiligen Bild-/3D-Datenanbieter. Reale Smartphone-/Raspberry-Pi-Leistungsmessungen und die zuvor offenen regionalen Quellenprüfungen bleiben offen. Die neue Vektorkarte wird im Browser gerendert; die GPU-Auflösung ist zur Begrenzung der Last auf 2× gedeckelt.
+Der Patch behält den Globus von 2.1.0, die vorhandenen Schlüssel und die Konfiguration bei. Die Veröffentlichung baut und prüft Backend, Frontend, Browser und das vollständige `weltlage.zip`. Lokal bestanden 65 Python-Tests, fünf JavaScript-Tests und 32 Browserprüfungen. Für kalte regionale Vektorkacheln erhält der Browser-Test ein längeres Wartebudget; seine Bedingungen bleiben unverändert.

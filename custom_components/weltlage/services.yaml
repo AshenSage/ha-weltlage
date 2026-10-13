@@ -1,32 +1,41 @@
 fetch_intel:
-  name: Globus-Daten laden
-  description: Legacy-Aufruf: begrenzten Backend-Cache für Flüge, Satelliten oder Fintraffic füllen. Ergebnisse erscheinen ausschliesslich in der Globuskarte, nicht in Sensorattributen.
+  name: Globus-Ebene laden
+  description: 'Kompatibilitätsaktion: Lädt Flüge, Satelliten oder Fintraffic-Kameras im angegebenen Ausschnitt.'
   fields:
     kind:
+      name: Ebene
       required: true
       selector:
         select:
           options:
-            - flights
-            - satellites
-            - cameras
+          - flights
+          - satellites
+          - cameras
+    provider:
+      name: Kameraanbieter
+      description: Bei cameras wird nur finland unterstützt. Weitere Webcams direkt in der Globuskarte öffnen.
+      default: london
+      selector:
+        select:
+          options:
+          - london
+          - finland
+          - bc
     latitude:
+      name: Breitengrad
+      default: 45
       selector:
         number:
           min: -90
           max: 90
+          step: 0.001
           mode: box
     longitude:
+      name: Längengrad
+      default: 15
       selector:
         number:
           min: -180
           max: 180
+          step: 0.001
           mode: box
-    provider:
-      description: Legacy-Auswahl: nur finland wird noch unterstützt. Öffentliche Windy-Webcams direkt in der Karte laden.
-      selector:
-        select:
-          options:
-            - london
-            - finland
-            - bc

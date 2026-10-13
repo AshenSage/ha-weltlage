@@ -1,5 +1,11 @@
 # Änderungen
 
+## 2.1.1 · 13.10.2026
+
+- YAML-Parserfehler in der Aktionsbeschreibung für `weltlage.fetch_intel` beheben; unterstützte Auswahlfelder und Vorgabewerte dokumentieren.
+- YAML-Dateien und Aktionsfelder vor dem Release prüfen.
+- Frontend-, Backend- und Paketversion gemeinsam auf 2.1.1 anheben.
+
 ## 1.2.0 · God's Eye: nur Globus
 
 - Nachrichten, Kennzahlenkarten und World-Monitor-Iframe aus der Karte entfernt. Auch mit bestehenden YAML-Karten startet die reine Globusansicht; alte Nachrichtenoptionen werden ignoriert. Nachrichtenquellen laufen nicht weiter im Hintergrund.

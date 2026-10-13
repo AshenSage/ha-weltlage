@@ -19,7 +19,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: npm ci
-      - run: python -m pip install aiohttp
+      - run: python -m pip install aiohttp "PyYAML>=6,<7"
       - run: npm run build
       - run: npm test && npm run test:python
       - run: npx playwright install --with-deps chromium

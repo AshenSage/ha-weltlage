@@ -1,3 +1,15 @@
+# Patchprüfung 2.1.1 · 13.10.2026
+
+- 65 Python-Tests und fünf JavaScript-Tests bestanden.
+- Frontend gebaut und vollständiges HACS-Paket geprüft: Manifest und Build 2.1.1, gültige Servicebeschreibung, alle 374 Paketdateien CRC-geprüft.
+- 32 Browserprüfungen mit realem Cesium/Vektordaten und simuliertem HA bestanden; keine Browserfehler.
+- Die erste lokale Browserprüfung überschritt die bisherige 45-Sekunden-Grenze beim kalten Laden der regionalen Vektordaten. Mit 180 Sekunden Wartebudget bestehen dieselben Assertions. Die beiden Tile-Wartebedingungen im Regressionstest verwenden deshalb nun 180 Sekunden; Renderer und Datenanbieter bleiben unverändert.
+- Der neue YAML-Test verhindert eine Veröffentlichung mit syntaktisch ungültigen Aktionsbeschreibungen. Die unterstützten Felder und Auswahlwerte sind geprüft.
+
+Die folgenden Berichte dokumentieren die frühere umfangreiche Globusprüfung; ihre jeweiligen Grenzen bleiben bestehen.
+
+---
+
 # Cesium-Rework: Prüfbericht / Fortsetzung
 
 Stand: 12.10.2026. Ausgangsbasis `7ec0a4f` (1.2.0), Original God's Eye View `591f299`. **Aktueller Veröffentlichungskanal: normales Release 2.1.0.** Die folgenden früheren Prüfabschnitte dokumentieren den Rework; der aktuelle Veröffentlichungsstand steht am Ende. Offene Live-/Gerätenachweise bleiben offen.
