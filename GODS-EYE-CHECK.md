@@ -1,5 +1,7 @@
 # God’s Eye: Einschätzung für deine HA-Weltlage
 
+> Historischer Vergleich vom 11.10.2026 zum damaligen Stand von Weltlage 1.2.0. Die Abschnitte zur eigenen HA-Karte beschreiben diese frühere Ausgabe. Aktuell ist **Weltlage 2.1.1** mit Cesium, optionalem Terrain/Google-3D sowie den zusätzlichen Schlüsselquellen. Funktionen, Einrichtung und heutige Grenzen stehen in der [README](README.md); frühere und spätere Live-Nachweise sind im [Prüfbericht](docs/TEST_REPORT.md) datiert. Angaben zum fremden Projekt wurden bei diesem Dokumentationsabgleich nicht erneut geprüft.
+
 Geprüft am 11.10.2026: **[bilawalsidhu/gods-eye-view](https://github.com/bilawalsidhu/gods-eye-view)**, das ursprüngliche God’s Eye View / WorldView. Da du keinen Link genannt hast, ist dies die gewählte Zuordnung. Ähnlich benannte Repositories können etwas anderes enthalten. Geprüft wurden die aktuelle Projektbeschreibung, Datenquellendokumentation und Einrichtungsangaben; kein vollständiges Code- oder Sicherheitsaudit.
 
 Es bringt viele öffentliche Signale auf eine 3D-Erde. Der praktische Mehrwert liegt im räumlichen Erkunden. Die taktische Darstellung allein sagt nichts über Verlässlichkeit oder Vollständigkeit aus.

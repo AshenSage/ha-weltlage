@@ -6,13 +6,20 @@
 - Die erste lokale Browserprüfung überschritt die bisherige 45-Sekunden-Grenze beim kalten Laden der regionalen Vektordaten. Mit 180 Sekunden Wartebudget bestehen dieselben Assertions. Die beiden Tile-Wartebedingungen im Regressionstest verwenden deshalb nun 180 Sekunden; Renderer und Datenanbieter bleiben unverändert.
 - Der neue YAML-Test verhindert eine Veröffentlichung mit syntaktisch ungültigen Aktionsbeschreibungen. Die unterstützten Felder und Auswahlwerte sind geprüft.
 
-Die folgenden Berichte dokumentieren die frühere umfangreiche Globusprüfung; ihre jeweiligen Grenzen bleiben bestehen.
+## GitHub-Abgleich · 13.10.2026
+
+- Das normale Release [`v2.1.1`](https://github.com/AshenSage/ha-weltlage/releases/tag/v2.1.1) ist veröffentlicht; `draft: false`, `prerelease: false`, vollständiges `weltlage.zip` als Asset.
+- Vor dem Dokumentationsupdate zeigen Release-Tag und `main` auf `8240978aa08a318137da619fd850c9a1fd27b2fb`. Alle zuletzt lokal vorbereiteten Quelldateien wurden anhand ihrer Git-Blob-Prüfsummen mit GitHub abgeglichen; keine Codeänderung fehlt.
+- [Main-Prüfung](https://github.com/AshenSage/ha-weltlage/actions/runs/38387275112) und [Release-Paketbau](https://github.com/AshenSage/ha-weltlage/actions/runs/38387286462) sind erfolgreich. Der Release-Paketbau führte Build, Python-/JavaScript-Tests, Browserprüfung und Paketbau vor Veröffentlichung aus.
+- Nach diesem Abgleich wurden ausschliesslich README, historische Dokumenthinweise, Vorschauanleitung und Release-Prüfsumme aktualisiert. Softwareversion und Release-Tag bleiben 2.1.1.
+
+Die folgenden Berichte dokumentieren frühere Prüfzeitpunkte in chronologischer Reihenfolge. Spätere Abschnitte ersetzen ältere Aussagen zu fehlenden Schlüsseln, Testständen und Veröffentlichungskanälen. Insbesondere gelten frühere Beta-Anweisungen nicht für das aktuelle normale Release. Offene Geräte- und regionale Abdeckungsnachweise werden dadurch nicht als bestanden gewertet.
 
 ---
 
 # Cesium-Rework: Prüfbericht / Fortsetzung
 
-Stand: 12.10.2026. Ausgangsbasis `7ec0a4f` (1.2.0), Original God's Eye View `591f299`. **Aktueller Veröffentlichungskanal: normales Release 2.1.0.** Die folgenden früheren Prüfabschnitte dokumentieren den Rework; der aktuelle Veröffentlichungsstand steht am Ende. Offene Live-/Gerätenachweise bleiben offen.
+Stand dieses historischen Rework-Berichts: 12.10.2026. Ausgangsbasis `7ec0a4f` (1.2.0), Original God's Eye View `591f299`. Der aktuelle Veröffentlichungsstand und die Patchprüfung stehen oben. Offene Live-/Gerätenachweise bleiben offen.
 
 ## Reproduzierbare Prüfungen
 

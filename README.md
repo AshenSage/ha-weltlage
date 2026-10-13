@@ -1,6 +1,6 @@
 # Weltlage · Cesium für Home Assistant
 
-**2.1.0 ist das normale HACS-Release.** Der Rework ersetzt den Canvas-Globus durch lokal gebündeltes Cesium 1.146.0. Bestehende Karten behalten `custom:weltlage-card`, CAP-Entitäten und `alert_areas`; `max_items` und `show_globe` werden weiterhin akzeptiert. Künftige Veröffentlichungen verwenden normale Versionsnummern ohne Beta-Kanal.
+**2.1.1 ist das aktuelle normale HACS-Release (13.10.2026).** Es behebt den YAML-Parserfehler der Aktion `weltlage.fetch_intel` und behält den scharfen Cesium-Globus aus 2.1.0. Der Rework ersetzt den Canvas-Globus durch lokal gebündeltes Cesium 1.146.0. Bestehende Karten behalten `custom:weltlage-card`, CAP-Entitäten und `alert_areas`; `max_items` und `show_globe` werden weiterhin akzeptiert. Künftige Veröffentlichungen verwenden normale Versionsnummern ohne Beta-Kanal.
 
 Beim Öffnen erscheint die ganze Erde mit Atmosphäre und Aranđelovac im Bildzentrum. Die Kameradistanz richtet sich nach dem verfügbaren Bildbereich. Home stellt diese Ansicht wieder her. Schnellziele führen nach Aranđelovac, Balkan, Europa und Schweiz. Koordinaten: 44.30694 N, 20.56 E ([verifizierte Ortskoordinaten](https://www.geodatos.net/en/coordinates/serbia/arandelovac)). Die letzte Kameraposition wird bewusst nicht wiederhergestellt.
 
@@ -20,7 +20,7 @@ Kartenstil, Layer, Satellitenkategorie, Effekte und Favoriten werden gerätebezo
 2. Einstellungen → Geräte & Dienste → Weltlage → Konfigurieren. Die sechs optionalen Schlüssel lokal eingeben.
 3. Dashboard neu laden. Bei einem alten Browsercache einmal vollständig neu laden. Die Lovelace-Ressource bekommt automatisch die installierte Version plus Build-Hash; keine manuelle Versionsnummer nötig.
 
-Das normale GitHub-Release `v2.1.0` enthält `weltlage.zip`. In HACS → Weltlage → ⋮ → Erneut herunterladen die Version `v2.1.0` auswählen. Ein Beta-Schalter ist nicht erforderlich. Falls noch eine kurze Commit-Version wie `7571422` angeboten wird, zuerst die Repository-Informationen in HACS aktualisieren. Das ZIP enthält alle Cesium-Worker, Widgets, Bilder und JavaScript-Dateien. Ein zusätzlicher Node-Dienst ist nicht notwendig. Zugangsdaten werden nach dem Neustart lokal unter Geräte & Dienste → Weltlage → Konfigurieren eingegeben; die Veröffentlichung enthält keine persönlichen Schlüssel.
+Das normale GitHub-Release [`v2.1.1`](https://github.com/AshenSage/ha-weltlage/releases/tag/v2.1.1) enthält `weltlage.zip`. In HACS → Weltlage → ⋮ → Erneut herunterladen die Version `v2.1.1` auswählen. Ein Beta-Schalter ist nicht erforderlich. Falls noch eine kurze Commit-Version wie `7571422` angeboten wird, zuerst die Repository-Informationen in HACS aktualisieren. Das ZIP enthält alle Cesium-Worker, Widgets, Bilder und JavaScript-Dateien. Ein zusätzlicher Node-Dienst ist nicht notwendig. Zugangsdaten werden nach dem Neustart lokal unter Geräte & Dienste → Weltlage → Konfigurieren eingegeben; die Veröffentlichung enthält keine persönlichen Schlüssel.
 
 Zeigt «Konfigurieren» noch ausschliesslich die Beschreibung «Globus mit öffentlichen Verkehrskameras … USGS und GDACS werden alle fünf Minuten geprüft», läuft noch der Dialog aus 1.2.0. Nach dem HACS-Update Home Assistant vollständig neu starten und die Seite neu laden. Der neue Dialog zeigt sechs Passwortfelder sowie das Abruflimit. Die bestehende Weltlage-Einrichtung kann erhalten bleiben.
 
@@ -64,7 +64,7 @@ Keine bezahlten Upgrades werden vorgenommen. Kartenkacheln, ion-Assets und Bilde
 
 ## Daten und Grenzen
 
-[Prüfbericht und Quellenmatrix](docs/TEST_REPORT.md) enthält die Live-Nachweise und offenen Punkte. Mapillary liefert maximal 20 Positionspunkte je Anfrage; der Ausschnitt darf höchstens 0,01 Quadratgrad umfassen. Einzelbilder werden erst beim Öffnen über den Backend-Token abgefragt.
+[Prüfbericht und Quellenmatrix](docs/TEST_REPORT.md) enthält oben die aktuelle Patchprüfung und darunter die datierten früheren Live-Nachweise und offenen Punkte. [TESTBERICHT.md](TESTBERICHT.md) und [GODS-EYE-CHECK.md](GODS-EYE-CHECK.md) dokumentieren den historischen Stand von 1.2.0. Mapillary liefert maximal 20 Positionspunkte je Anfrage; der Ausschnitt darf höchstens 0,01 Quadratgrad umfassen. Einzelbilder werden erst beim Öffnen über den Backend-Token abgefragt.
 
 Hauptlayer sind ADS-B, Satelliten, Windy, Fintraffic, Radar, globales IR, Windmodell, TomTom, AISStream, EMSC, FIRMS, Mapillary, NASA-Tagesmosaik, OSM-Infrastruktur, Kabel, GDACS und CAP.
 
@@ -80,7 +80,7 @@ Authentifizierte Home-Assistant-WebSocket-Kommandos `weltlage/config`, `weltlage
 
 ```sh
 npm ci
-python -m pip install aiohttp
+python -m pip install aiohttp "PyYAML>=6,<7"
 npm run build
 npm test
 npm run test:python
@@ -88,6 +88,12 @@ npx playwright install --with-deps chromium
 npm run test:browser
 npm run package
 ```
+
+Für die Entwicklung werden Node.js 22 und Python 3.12 oder neuer verwendet. Die aktuelle lokale Vorschau startet nach dem Build mit `npm run preview` unter `http://127.0.0.1:8080`. Sie verwendet die gebaute Cesium-Karte, simulierte HA-Antworten und keine persönlichen Schlüssel. [VORSCHAU.html](VORSCHAU.html) enthält die vollständigen Startschritte; die alte eingebettete Canvas-Demo wurde ersetzt.
+
+Die Release-Workflows für `v2.1.1` haben Build, fünf JavaScript-Tests, 65 Python-Tests, 32 Browserprüfungen und den HACS-Paketbau erfolgreich abgeschlossen. Das ist kein Nachweis einer Installation auf dem eigenen HA-Gerät. Die [Release-Notizen](docs/RELEASE_NOTES.md) beschreiben den Patch.
+
+[SHA256SUMS.txt](SHA256SUMS.txt) enthält die von GitHub gemeldete SHA-256-Prüfsumme der ZIP-Datei aus `v2.1.1`. Sie gilt für dieses Release-Asset, nicht für ein neu gebautes lokales ZIP oder den Quellcode-Download. Nach dem manuellen Download dieses Assets lässt sich die Prüfsumme mit `sha256sum -c SHA256SUMS.txt` prüfen.
 
 `npm run preview` startet eine lokale **UI-Vorschau mit simuliertem HA**. Sie liefert keine produktiven oder vorgetäuschten Live-Objekte. Die generierten Frontend-Dateien sind Build-Ausgabe und werden im HACS-ZIP statt als grosse, handgepflegte Git-Dateien verteilt. GitHub Actions baut und prüft das Review-Paket; der Release-Workflow verlangt eine zum Manifest passende Versionsmarke.
 

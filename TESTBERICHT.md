@@ -1,5 +1,7 @@
 # Prüfung · Weltlage 1.2.0
 
+> Historischer Prüfbericht vom 11.10.2026 für Version 1.2.0. Die damalige Canvas-Oberfläche, Testbefehle und Funktionsgrenzen beschreiben diese frühere Ausgabe. Aktuell ist das normale Release **2.1.1** mit Cesium. Aktuelle Installation und Testbefehle stehen in der [README](README.md), die aktuelle Patchprüfung und datierte Quellen-Nachprüfungen im [Prüfbericht](docs/TEST_REPORT.md).
+
 Stand: 11.10.2026. Ziel: Home Assistant 2026.10 oder neuer. Die neue Ausgabe wurde lokal geprüft. Die vorherige Globusversion 1.1.2 wurde vom Nutzer in seiner HA-Ansicht bestätigt; 1.2.0 wurde noch nicht auf seinem Gerät installiert.
 
 | Prüfung | Ergebnis |
